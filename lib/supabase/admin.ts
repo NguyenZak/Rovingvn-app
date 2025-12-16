@@ -27,65 +27,28 @@ export function createAdminClient() {
     })
 }
 
-/**
- * Assign role to user (admin only operation)
- */
-export async function assignUserRole(userId: string, roleName: string) {
-    const adminClient = createAdminClient()
-
-    // Get role ID
-    const { data: role, error: roleError } = await adminClient
-        .from('roles')
-        .select('id')
-        .eq('name', roleName)
-        .single()
-
-    if (roleError || !role) {
-        return { success: false, error: 'Role not found' }
-    }
-
-    // Assign role to user
-    const { error } = await adminClient
-        .from('user_roles')
-        .insert({
-            user_id: userId,
-            role_id: role.id
-        })
-
-    if (error) {
-        return { success: false, error: error.message }
-    }
-
-    return { success: true }
-}
-
-/**
- * Remove role from user (admin only operation)
- */
-export async function removeUserRole(userId: string, roleName: string) {
-    const adminClient = createAdminClient()
-
-    // Get role ID
-    const { data: role, error: roleError } = await adminClient
-        .from('roles')
-        .select('id')
-        .eq('name', roleName)
-        .single()
-
-    if (roleError || !role) {
-        return { success: false, error: 'Role not found' }
-    }
-
-    // Remove role from user
-    const { error } = await adminClient
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId)
-        .eq('role_id', role.id)
-
-    if (error) {
-        return { success: false, error: error.message }
-    }
-
-    return { success: true }
-}
+// NOTE: user_roles functionality commented out until table is created in database
+// /**
+//  * Assign role to user (admin only operation)
+//  */
+// export async function assignUserRole(userId: string, roleName: string) {
+//     const adminClient = createAdminClient()
+//     const { data: role, error: roleError} = await adminClient
+//         .from('roles')
+//         .select('id')
+//         .eq('name', roleName)
+//         .single()
+//     if (roleError || !role) {
+//         return { success: false, error: 'Role not found' }
+//     }
+//     const { error } = await adminClient
+//         .from('user_roles')
+//         .insert({
+//             user_id: userId,
+//             role_id: role.id
+//         })
+//     if (error) {
+//         return { success: false, error: error.message }
+//     }
+//     return { success: true }
+// }

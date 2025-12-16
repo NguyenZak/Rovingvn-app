@@ -21,7 +21,7 @@ export function TourCard({ tour }: TourCardProps) {
     }
 
     // Fallback image
-    const coverImage = tour.cover_image || tour.images?.[0] || 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?q=80&w=2000&auto=format&fit=crop'
+    const coverImage = (tour as any).cover_image || tour.images?.[0] || 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?q=80&w=2000&auto=format&fit=crop'
 
     return (
         <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">

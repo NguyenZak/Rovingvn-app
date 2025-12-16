@@ -5,11 +5,15 @@ import { Clock, MapPin, Calendar, Check } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 
-export async function generateStaticParams() {
-    const supabase = await createClient()
-    const { data: tours } = await supabase.from('tours').select('slug')
-    return tours?.map(({ slug }) => ({ slug })) || []
-}
+// Force dynamic rendering to avoid build-time cookie access issues
+export const dynamic = 'force-dynamic'
+
+// Commented out for now to avoid build issues
+// export async function generateStaticParams() {
+//     const supabase = await createClient()
+//     const { data: tours } = await supabase.from('tours').select('slug')
+//     return tours?.map(({ slug }) => ({ slug })) || []
+// }
 
 export default async function TourPage({ params }: { params: { slug: string } }) {
     const supabase = await createClient()
@@ -96,7 +100,7 @@ export default async function TourPage({ params }: { params: { slug: string } })
                             <section>
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Gallery</h2>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {images.slice(1).map((img, i) => (
+                                    {images.slice(1).map((img: string, i: number) => (
                                         <div key={i} className="aspect-video rounded-xl overflow-hidden bg-gray-100">
                                             <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                                         </div>

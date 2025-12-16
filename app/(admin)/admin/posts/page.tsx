@@ -91,7 +91,7 @@ export default async function PostsPage() {
                                 {VI_LABELS.posts.createdAt}
                             </th>
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                {VI_LABELS.actions.actions}
+                                Actions
                             </th>
                         </tr>
                     </thead>
@@ -122,8 +122,7 @@ export default async function PostsPage() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-900">
-                                        {/* @ts-expect-error Supabase relation type */}
-                                        {post.author?.email || '-'}
+                                        {(post as any).author?.email || '-'}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
                                         {/* @ts-expect-error Supabase relation type */}

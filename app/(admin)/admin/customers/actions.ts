@@ -2,26 +2,27 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 export async function upsertCustomer(formData: FormData) {
     const supabase = await createClient()
 
     const id = formData.get('id') as string | null
+    const tags = formData.get('tags') as string
+    const tagsArray = tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : []
 
     const data = {
-        fullname: formData.get('fullname') as string,
-        email: formData.get('email') as string,
-        phone: formData.get('phone') as string,
-        nationality: formData.get('nationality') as string,
+        fullname: formData.get('fullname'),
+        email: formData.get('email'),
+        phone: formData.get('phone') || null,
+        nationality: formData.get('nationality') || null,
         date_of_birth: formData.get('date_of_birth') || null,
         passport_number: formData.get('passport_number') || null,
         address: formData.get('address') || null,
-        tags: formData.get('tags') || null,
+        tags: tagsArray,
         notes: formData.get('notes') || null,
     }
 
-    let error
+    let error;
     if (id) {
         const res = await supabase.from('customers').update(data).eq('id', id)
         error = res.error
@@ -36,7 +37,7 @@ export async function upsertCustomer(formData: FormData) {
     }
 
     revalidatePath('/admin/customers')
-    redirect('/admin/customers')
+    return { success: true }
 }
 
 export async function deleteCustomer(id: string) {

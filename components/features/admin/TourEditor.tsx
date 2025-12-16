@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import TourForm from './TourForm'
 
-export default async function TourEditor({ params }: { params: Promise<{ id?: string }> }) {
+export default async function TourEditor({ params }: { params: { id?: string } }) {
     const supabase = await createClient()
-    const { id } = await params
+    const { id } = params
     const isEdit = !!id
 
     let tour = null

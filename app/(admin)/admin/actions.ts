@@ -199,12 +199,13 @@ export async function upsertBlogPost(formData: FormData) {
     }
 
     if (error) {
+        console.error('Error saving blog post:', error)
         return { error: error.message }
     }
 
     revalidatePath('/admin/blog')
     revalidatePath('/blog')
-    redirect('/admin/blog')
+    return { success: true }
 }
 
 export async function deleteTour(id: string) {
