@@ -2,14 +2,16 @@
 
 import { useState } from 'react'
 import { upsertTour } from '@/app/(admin)/admin/actions'
-import { Save, ChevronLeft, Image } from 'lucide-react'
+import { Save, ChevronLeft, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import MediaPicker from '@/components/ui/MediaPicker'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 interface TourFormProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tour?: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     destinations?: any[]
     relatedDestinationIds?: string[]
 }
@@ -17,7 +19,7 @@ interface TourFormProps {
 export default function TourForm({ tour, destinations, relatedDestinationIds = [] }: TourFormProps) {
     const router = useRouter()
     const isEdit = !!tour?.id
-    const [imageUrl, setImageUrl] = useState(tour?.cover_image || tour?.image_url || '')
+    const [imageUrl, setImageUrl] = useState(tour?.cover_image || tour?.featured_image || tour?.image_url || '')
 
     // Multi-destination state
     // Use relatedDestinationIds if available, otherwise fallback to single destination_id if present (legacy)
@@ -36,7 +38,9 @@ export default function TourForm({ tour, destinations, relatedDestinationIds = [
 
     // Gallery State Logic
     const getGalleryUrls = () => {
-        if (tour?.images && Array.isArray(tour.images)) return tour.images
+        // Check new schema first, then legacy schema (gallery_images might be array in DB)
+        const images = tour?.images || tour?.gallery_images
+        if (images && Array.isArray(images)) return images
         try {
             const parsed = JSON.parse(tour?.gallery_images || '[]')
             return Array.isArray(parsed) ? parsed : []
@@ -130,7 +134,7 @@ export default function TourForm({ tour, destinations, relatedDestinationIds = [
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
                                 <input
                                     name="duration"
-                                    defaultValue={tour?.duration || ''}
+                                    defaultValue={tour?.duration || (tour?.duration_days ? `${tour.duration_days} Days ${tour.duration_nights} Nights` : '')}
                                     placeholder="e.g., 3 Days 2 Nights"
                                     type="text"
                                     className="w-full px-4 py-2 font-medium text-gray-600 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
@@ -141,7 +145,7 @@ export default function TourForm({ tour, destinations, relatedDestinationIds = [
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Price (USD)</label>
                                 <input
                                     name="price"
-                                    defaultValue={tour?.price}
+                                    defaultValue={tour?.price ?? tour?.price_adult}
                                     type="number"
                                     min="0"
                                     step="0.01"
@@ -182,7 +186,7 @@ export default function TourForm({ tour, destinations, relatedDestinationIds = [
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Highlights & Inclusions</h3>
                         <textarea
                             name="highlights"
-                            defaultValue={Array.isArray(tour?.highlights) ? tour.highlights.join('\n') : tour?.highlights || ''}
+                            defaultValue={Array.isArray(tour?.highlights || tour?.includes) ? (tour?.highlights || tour?.includes).join('\n') : (tour?.highlights || tour?.includes) || ''}
                             rows={4}
                             placeholder="• Professional tour guide&#10;• Accommodation in 4-star hotel&#10;• All meals included&#10;• Airport transfers"
                             className="w-full px-4 py-2 font-medium text-gray-600 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono text-sm"
@@ -193,7 +197,7 @@ export default function TourForm({ tour, destinations, relatedDestinationIds = [
                     {/* Images */}
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <Image size={20} className="text-purple-600" />
+                            <ImageIcon size={20} className="text-purple-600" />
                             Images & Media
                         </h2>
                         <div className="space-y-6">
@@ -216,6 +220,7 @@ export default function TourForm({ tour, destinations, relatedDestinationIds = [
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
                                     {galleryUrls.map((url, index) => (
                                         <div key={index} className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200 bg-gray-50 shadow-sm">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img src={url} alt={`Gallery ${index}`} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                                             <button

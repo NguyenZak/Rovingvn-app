@@ -13,7 +13,7 @@ export default function DesignYourTripPage() {
             <div className="bg-emerald-900 py-16 text-white text-center">
                 <h1 className="text-4xl md:text-5xl font-bold mb-4">Design Your Dream Trip</h1>
                 <p className="text-emerald-100 text-xl max-w-2xl mx-auto px-4">
-                    Tell us where you want to go and what you love to do. We'll build a unique itinerary just for you.
+                    Tell us where you want to go and what you love to do. We&apos;ll build a unique itinerary just for you.
                 </p>
             </div>
 

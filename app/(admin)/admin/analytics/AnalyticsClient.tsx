@@ -40,7 +40,7 @@ interface Props {
 
 const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899']
 
-export default function AnalyticsClient({ bookings, tours, customers }: Props) {
+export default function AnalyticsClient({ bookings, customers }: Props) {
     const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month')
 
     // Calculate revenue over time
@@ -155,7 +155,7 @@ export default function AnalyticsClient({ bookings, tours, customers }: Props) {
                 </div>
                 <select
                     value={timeRange}
-                    onChange={(e) => setTimeRange(e.target.value as any)}
+                    onChange={(e) => setTimeRange(e.target.value as 'week' | 'month' | 'year')}
                     className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 >
                     <option value="week">Last 7 Days</option>
@@ -295,7 +295,7 @@ export default function AnalyticsClient({ bookings, tours, customers }: Props) {
                                 fill="#8884d8"
                                 dataKey="value"
                             >
-                                {demographics.map((entry, index) => (
+                                {demographics.map((_entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>

@@ -1,19 +1,52 @@
+/**
+ * Tours Management - Server Page  
+ * Load tours and pass to client component
+ */
 
-import { createClient } from '@/lib/supabase/server'
-import ToursClient from './ToursClient'
+import { getAllTours, type Tour } from "@/lib/actions/tour-actions";
+import { ToursClient } from "./ToursClient";
+import { hasPermission } from "@/lib/rbac/permissions";
+import { redirect } from "next/navigation";
 
-export default async function AdminToursPage() {
-    const supabase = await createClient()
-    // Simplified fetch to debug
-    const { data: tours, error } = await supabase.from('tours').select('*').order('created_at', { ascending: false })
+export const metadata = {
+    title: "Tours Management | Admin",
+    description: "Manage tours and travel packages",
+};
 
-    if (error) {
-        console.error('Error fetching tours:', error)
+export const dynamic = 'force-dynamic';
+
+export default async function ToursPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ page?: string; search?: string; status?: string }>;
+}) {
+    // Check permission
+    const canView = await hasPermission('view_tours');
+    if (!canView) {
+        redirect('/admin');
     }
-    console.log('Fetched tours count (simple):', tours?.length)
 
-    // Manual mock of destinations for UI to prevent crash if it expects array
-    const toursWithDests = tours?.map(t => ({ ...t, destinations: [] })) || []
+    const { page: pageParam, search: searchParam, status: statusParam } = await searchParams;
 
-    return <ToursClient tours={toursWithDests} />
+    const page = Number(pageParam) || 1;
+    const search = searchParam || '';
+    const status = statusParam || '';
+
+    const result = await getAllTours({
+        page,
+        search,
+        status,
+        limit: 20
+    });
+
+    const tours: Tour[] = result.success && result.data ? result.data as Tour[] : [];
+
+
+    return (
+        <ToursClient
+            initialTours={tours}
+            initialSearch={search}
+            initialStatus={status}
+        />
+    );
 }

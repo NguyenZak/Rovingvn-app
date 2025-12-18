@@ -188,6 +188,7 @@ export default function MediaLibraryClient({ initialMedia }: MediaLibraryClientP
                                 onClick={() => setSelectedMedia(item)}
                             >
                                 <div className="aspect-square bg-gray-100">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={item.url}
                                         alt={item.alt_text || item.filename}
@@ -245,6 +246,7 @@ export default function MediaLibraryClient({ initialMedia }: MediaLibraryClientP
 
                         <div className="p-4 space-y-4">
                             <div className="bg-gray-100 rounded-lg overflow-hidden">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={selectedMedia.url}
                                     alt={selectedMedia.alt_text || selectedMedia.filename}

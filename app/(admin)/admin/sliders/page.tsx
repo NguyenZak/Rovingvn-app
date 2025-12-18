@@ -6,8 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 // import { requireEditor } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Slider } from '@/lib/types/cms'
-import { VI_LABELS } from '@/lib/constants/vi'
-import { Edit, Trash2, Eye, EyeOff } from 'lucide-react'
+import { Edit, Trash2 } from 'lucide-react'
 
 export default async function SlidersPage() {
     // await requireEditor() // Temporarily disabled for testing
@@ -88,8 +87,11 @@ export default async function SlidersPage() {
                             >
                                 {/* Image */}
                                 <div className="relative h-48 bg-gray-100">
+                                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                     {(slider as any).image?.url ? (
+                                        /* eslint-disable-next-line @next/next/no-img-element */
                                         <img
+                                            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
                                             src={(slider as any).image.url}
                                             alt={slider.title}
                                             className="w-full h-full object-cover"

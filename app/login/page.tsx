@@ -1,10 +1,8 @@
-
 'use client'
 
 import { login } from './actions'
 import { useState } from 'react';
 import { Loader2, Lock } from 'lucide-react';
-import Image from 'next/image';
 
 export default function LoginPage() {
     const [loading, setLoading] = useState(false);

@@ -5,7 +5,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { requireEditor } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { PostWithRelations, PostStatus } from '@/lib/types/cms'
+import { PostWithRelations } from '@/lib/types/cms'
 import { VI_LABELS } from '@/lib/constants/vi'
 
 
@@ -122,6 +122,7 @@ export default async function PostsPage() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-900">
+                                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                         {(post as any).author?.email || '-'}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">

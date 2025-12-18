@@ -1,5 +1,6 @@
 
 import { Utensils, Building2, Palmtree, Users } from 'lucide-react'
+import Image from 'next/image'
 
 const HIGHLIGHTS = [
     {
@@ -41,12 +42,20 @@ export function CulturalHighlights() {
                     <div className="w-full md:w-1/2">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-4 mt-8">
-                                <img src="https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=600" className="rounded-2xl shadow-lg w-full h-48 object-cover" alt="Vietnam Street" />
-                                <img src="https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=600" className="rounded-2xl shadow-lg w-full h-64 object-cover" alt="Vietnam Landscape" />
+                                <div className="relative w-full h-48 rounded-2xl overflow-hidden shadow-lg">
+                                    <Image src="https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=600" fill className="object-cover" alt="Vietnam Street" />
+                                </div>
+                                <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-lg">
+                                    <Image src="https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=600" fill className="object-cover" alt="Vietnam Landscape" />
+                                </div>
                             </div>
                             <div className="space-y-4">
-                                <img src="https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?q=80&w=600" className="rounded-2xl shadow-lg w-full h-64 object-cover" alt="Hoi An Lanterns" />
-                                <img src="https://images.unsplash.com/photo-1504214208698-ea1916a2195a?q=80&w=600" className="rounded-2xl shadow-lg w-full h-48 object-cover" alt="Golden Bridge" />
+                                <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-lg">
+                                    <Image src="https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?q=80&w=600" fill className="object-cover" alt="Hoi An Lanterns" />
+                                </div>
+                                <div className="relative w-full h-48 rounded-2xl overflow-hidden shadow-lg">
+                                    <Image src="https://images.unsplash.com/photo-1504214208698-ea1916a2195a?q=80&w=600" fill className="object-cover" alt="Golden Bridge" />
+                                </div>
                             </div>
                         </div>
                     </div>

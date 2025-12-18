@@ -13,16 +13,14 @@ export default async function AdminDashboard() {
         { count: postsCount },
         { count: destinationsCount },
         { data: recentBookings },
-        { data: recentPosts },
-        { data: recentTours }
+        { data: recentPosts }
     ] = await Promise.all([
         supabase.from('tours').select('*', { count: 'exact', head: true }),
         supabase.from('bookings').select('*', { count: 'exact', head: true }),
         supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
         supabase.from('destinations').select('*', { count: 'exact', head: true }),
         supabase.from('bookings').select('*, tours(title)').order('created_at', { ascending: false }).limit(5),
-        supabase.from('blog_posts').select('*').order('created_at', { ascending: false }).limit(5),
-        supabase.from('tours').select('*').order('created_at', { ascending: false }).limit(5)
+        supabase.from('blog_posts').select('*').order('created_at', { ascending: false }).limit(5)
     ])
 
     const stats = [
@@ -69,7 +67,7 @@ export default async function AdminDashboard() {
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-                    <p className="text-sm text-gray-500 mt-1">Welcome back! Here's what's happening with your business.</p>
+                    <p className="text-sm text-gray-500 mt-1">Welcome back! Here&apos;s what&apos;s happening with your business.</p>
                 </div>
             </div>
 
@@ -111,11 +109,12 @@ export default async function AdminDashboard() {
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
                                                 <p className="font-medium text-gray-900">{booking.customer_name}</p>
+                                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                                 <p className="text-sm text-gray-600 mt-1">{(booking as any).tours?.title || 'Tour'}</p>
                                             </div>
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
-                                                    booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                                        'bg-amber-100 text-amber-800'
+                                                booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                                    'bg-amber-100 text-amber-800'
                                                 }`}>
                                                 {booking.status}
                                             </span>

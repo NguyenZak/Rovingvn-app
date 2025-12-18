@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 // Mock data removed in favor of dynamic props
 
 interface RecommendedProvincesProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     destinations: any[]
 }
 

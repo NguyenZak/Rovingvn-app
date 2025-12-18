@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function CustomerFormClient({ customer, isEdit, bookings }: { customer: any, isEdit: boolean, bookings: any[] }) {
     const router = useRouter()
 

@@ -63,10 +63,10 @@ export function Header() {
                         </Link>
                     ))}
                     <Link
-                        href="/contact"
+                        href="/design-your-trip"
                         className="bg-emerald-600 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
                     >
-                        Plan Your Trip
+                        Design Your Tour
                     </Link>
                 </nav>
 
@@ -98,11 +98,11 @@ export function Header() {
                     ))}
                     <hr className="border-gray-100" />
                     <Link
-                        href="/contact"
+                        href="/design-your-trip"
                         className="bg-emerald-600 text-white px-5 py-3 rounded-xl text-center font-semibold hover:bg-emerald-700 transition-colors"
                         onClick={() => setMobileMenuOpen(false)}
                     >
-                        Plan Your Trip
+                        Design Your Tour
                     </Link>
                 </div>
             )}

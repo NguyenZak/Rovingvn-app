@@ -2,7 +2,8 @@
 'use client'
 
 import { useState } from 'react'
-import { submitBooking } from '@/app/actions'
+import Image from 'next/image'
+import { submitCustomTrip } from '@/lib/actions/custom-trip-actions'
 import { Check, MapPin, Calendar, Users, Briefcase, ChevronRight, ChevronLeft, Loader2, Send } from 'lucide-react'
 
 const DESTINATIONS = [
@@ -56,27 +57,34 @@ export function CustomTripBuilder() {
         setLoading(true)
         setError(null)
 
-        const form = new FormData()
-        form.append('name', formData.name)
-        form.append('email', formData.email)
-        form.append('phone', formData.phone)
-        form.append('people', formData.people)
-        form.append('date', travelDate) // Note: submitBooking might generally ignore this if not mapped, but we'll put it in notes
+        // Build destinations array with full data
+        const destinations = DESTINATIONS
+            .filter(d => selectedDestinations.includes(d.id))
+            .map(d => ({
+                id: d.id,
+                name: d.name,
+                region: d.region
+            }))
 
-        // Construct rich notes
-        const destNames = DESTINATIONS.filter(d => selectedDestinations.includes(d.id)).map(d => d.name).join(', ')
-        const styleNames = STYLES.filter(s => selectedStyles.includes(s.id)).map(s => s.name).join(', ')
-        const richNotes = `
-      [CUSTOM TRIP INQUIRY]
-      Destinations: ${destNames}
-      Duration: ${duration} days
-      Approx Date: ${travelDate}
-      Styles: ${styleNames}
-      User Notes: ${formData.notes}
-    `
-        form.append('message', richNotes)
+        // Build travel styles array with full data
+        const travelStyles = STYLES
+            .filter(s => selectedStyles.includes(s.id))
+            .map(s => ({
+                id: s.id,
+                name: s.name
+            }))
 
-        const result = await submitBooking(form)
+        const result = await submitCustomTrip({
+            customer_name: formData.name,
+            customer_email: formData.email,
+            customer_phone: formData.phone,
+            destinations,
+            duration_days: parseInt(duration),
+            travel_date: travelDate || undefined,
+            travel_styles: travelStyles,
+            number_of_travelers: parseInt(formData.people),
+            additional_notes: formData.notes || undefined
+        })
 
         setLoading(false)
         if (result.success) {
@@ -139,8 +147,8 @@ export function CustomTripBuilder() {
                                         : 'border-transparent hover:scale-105 opacity-90 hover:opacity-100'
                                         }`}
                                 >
-                                    <div className="aspect-square bg-gray-100">
-                                        <img src={dest.image} alt={dest.name} className="w-full h-full object-cover" />
+                                    <div className="aspect-square bg-gray-100 relative">
+                                        <Image src={dest.image} alt={dest.name} fill className="object-cover" />
                                     </div>
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                                     <div className="absolute bottom-3 left-3 text-white">

@@ -36,6 +36,9 @@ export async function getAllMedia() {
 /**
  * Upload a file to Cloudinary
  */
+/**
+ * Upload a file to Cloudinary
+ */
 export async function uploadMedia(formData: FormData): Promise<APIResponse<{ id: string; url: string }>> {
     try {
         const supabase = await createClient()
@@ -47,6 +50,7 @@ export async function uploadMedia(formData: FormData): Promise<APIResponse<{ id:
 
         const file = formData.get('file') as File
         const altText = formData.get('alt_text') as string || ''
+        const folder = formData.get('folder') as string || 'roving-vietnam/media'
 
         if (!file) {
             return { success: false, error: 'Không có file' }
@@ -68,7 +72,7 @@ export async function uploadMedia(formData: FormData): Promise<APIResponse<{ id:
 
         // Upload to Cloudinary
         const cloudinaryResult = await uploadToCloudinary(buffer, {
-            folder: 'roving-vietnam/media',
+            folder: folder,
         })
 
         // Save to database

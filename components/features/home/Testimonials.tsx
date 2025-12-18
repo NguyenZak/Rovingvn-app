@@ -2,6 +2,7 @@
 'use client'
 
 import { Star, Quote } from 'lucide-react'
+import Image from 'next/image'
 
 const REVIEWS = [
     {
@@ -37,7 +38,7 @@ export function Testimonials() {
             <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center max-w-3xl mx-auto mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Travelers Say</h2>
-                    <p className="text-emerald-100/80 text-lg">Don't just take our word for it. Read reviews from our happy customers.</p>
+                    <p className="text-emerald-100/80 text-lg">Don&apos;t just take our word for it. Read reviews from our happy customers.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -49,10 +50,17 @@ export function Testimonials() {
 
                             <Quote className="text-emerald-400 mb-4 opacity-50" size={32} />
 
-                            <p className="text-lg leading-relaxed mb-6 italic text-emerald-50">"{review.text}"</p>
+                            <p className="text-lg leading-relaxed mb-6 italic text-emerald-50">&quot;{review.text}&quot;</p>
 
                             <div className="flex items-center gap-4">
-                                <img src={review.image} alt={review.name} className="w-12 h-12 rounded-full object-cover border-2 border-emerald-400" />
+                                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-emerald-400">
+                                    <Image
+                                        src={review.image}
+                                        alt={review.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
                                 <div>
                                     <h4 className="font-bold">{review.name}</h4>
                                     <p className="text-sm text-emerald-200">{review.country}</p>

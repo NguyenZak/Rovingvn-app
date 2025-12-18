@@ -30,7 +30,7 @@ export function WhyUs() {
             <div className="container mx-auto px-4">
                 <div className="text-center max-w-2xl mx-auto mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Travel with Us?</h2>
-                    <p className="text-gray-600 text-lg">We don't just sell tours; we craft unforgettable journeys that connect you with the heart of Vietnam.</p>
+                    <p className="text-gray-600 text-lg">We don&apos;t just sell tours; we craft unforgettable journeys that connect you with the heart of Vietnam.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

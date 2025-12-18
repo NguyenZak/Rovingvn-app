@@ -5,15 +5,21 @@ import { useRouter } from 'next/navigation'
 import { Slider, SliderStatus } from '@/lib/types/cms'
 import { createSlider, updateSlider } from '@/app/(admin)/admin/sliders/actions'
 import { VI_LABELS } from '@/lib/constants/vi'
+import MediaPicker from '@/components/ui/MediaPicker'
 
 interface SliderFormProps {
-    slider?: Slider
+    slider?: Slider & {
+        image?: {
+            url: string
+        }
+    }
 }
 
 export default function SliderForm({ slider }: SliderFormProps) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string>(slider?.image?.url || '')
 
     // Form state
     const [formData, setFormData] = useState({
@@ -192,21 +198,35 @@ export default function SliderForm({ slider }: SliderFormProps) {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     {VI_LABELS.sliders.image}
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                    <p className="text-gray-500 text-sm">
-                        Tích hợp với Media Library (sẽ bổ sung sau)
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                        Hiện tại có thể nhập ID ảnh từ bảng media
-                    </p>
-                    <input
-                        type="text"
-                        value={formData.image_id}
-                        onChange={(e) => setFormData({ ...formData, image_id: e.target.value })}
-                        className="mt-4 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
-                        placeholder="UUID ảnh"
-                    />
+                <div className="border rounded-lg p-1">
+                    <MediaPicker
+                        label=""
+                        value={previewUrl}
+                        onChange={() => { }} // We use onSelectMedia for more control
+                        onSelectMedia={(media) => {
+                            if (!Array.isArray(media)) {
+                                setFormData({ ...formData, image_id: media.id })
+                                setPreviewUrl(media.url)
+                            }
+                        }}
+                    >
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-colors">
+                            <p className="text-gray-500 text-sm font-medium">
+                                Chọn ảnh từ Media Library hoặc tải lên
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                                Hỗ trợ: JPG, PNG, WebP
+                            </p>
+                            {!previewUrl && formData.image_id && (
+                                <p className="text-xs text-blue-500 mt-2">
+                                    Đang sử dụng ảnh ID: {formData.image_id}
+                                </p>
+                            )}
+                        </div>
+                    </MediaPicker>
                 </div>
+                {/* Hidden input to ensure ID is submitted if needed manually? No, state handles it */}
+                <input type="hidden" name="image_id" value={formData.image_id} />
             </div>
 
             {/* Actions */}

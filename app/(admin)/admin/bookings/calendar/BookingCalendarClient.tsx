@@ -52,7 +52,7 @@ export default function BookingCalendarClient({ bookings }: { bookings: Booking[
         const endDate = new Date(lastDay)
         endDate.setDate(endDate.getDate() + (6 - lastDay.getDay())) // End on Saturday
 
-        let current = new Date(startDate)
+        const current = new Date(startDate)
         while (current <= endDate) {
             days.push(new Date(current))
             current.setDate(current.getDate() + 1)
@@ -104,8 +104,8 @@ export default function BookingCalendarClient({ bookings }: { bookings: Booking[
                     <button
                         onClick={() => setViewMode('month')}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'month'
-                                ? 'bg-emerald-600 text-white'
-                                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                             }`}
                     >
                         Month
@@ -113,8 +113,8 @@ export default function BookingCalendarClient({ bookings }: { bookings: Booking[
                     <button
                         onClick={() => setViewMode('week')}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${viewMode === 'week'
-                                ? 'bg-emerald-600 text-white'
-                                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                             }`}
                     >
                         Week
@@ -211,10 +211,10 @@ export default function BookingCalendarClient({ bookings }: { bookings: Booking[
                                                 key={booking.id}
                                                 href={`/admin/bookings/${booking.id}`}
                                                 className={`block text-xs p-1 rounded truncate ${booking.booking_status === 'confirmed'
-                                                        ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                                                        : booking.booking_status === 'cancelled'
-                                                            ? 'bg-red-100 text-red-800 hover:bg-red-200'
-                                                            : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                                                    ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                                                    : booking.booking_status === 'cancelled'
+                                                        ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                                                        : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
                                                     }`}
                                                 title={booking.tours?.title || 'Booking'}
                                             >

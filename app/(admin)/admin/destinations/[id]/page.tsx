@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import DestinationForm from './DestinationForm'
+import { DestinationForm } from '../_components/DestinationForm'
 
 export default async function DestinationFormPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params

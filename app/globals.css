@@ -23,3 +23,36 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+/* Global heading styling for better readability */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {}
+
+/* Global label styling */
+label {
+  @apply text-gray-800 font-semibold;
+}
+
+/* Global input/textarea styling for better readability */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {
+  @apply text-gray-900 font-medium;
+}
+
+input::placeholder,
+textarea::placeholder {
+  @apply text-gray-400 font-normal;
+}

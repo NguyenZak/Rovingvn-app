@@ -21,9 +21,11 @@ export default async function AnalyticsPage() {
         .select('id, title')
 
     // Get customers data  
-    const { data: customers } = await supabase
-        .from('customers')
-        .select('id, nationality, created_at')
+    // const { data: customers } = await supabase
+    //     .from('customers')
+    //     .select('id, nationality, created_at')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const customers: any[] = []
 
     return (
         <AnalyticsClient

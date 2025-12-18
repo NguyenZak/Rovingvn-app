@@ -3,7 +3,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+// import { redirect } from 'next/navigation'
 
 export async function upsertTour(formData: FormData) {
     const supabase = await createClient()
@@ -14,7 +14,7 @@ export async function upsertTour(formData: FormData) {
 
     // Process gallery images including parsing JSON from MediaPicker
     const galleryInput = formData.get('gallery_images') as string
-    let gallery_images = null
+    let gallery_images: string[] = []
 
     if (galleryInput) {
         try {
@@ -22,7 +22,7 @@ export async function upsertTour(formData: FormData) {
             if (Array.isArray(parsed)) {
                 gallery_images = parsed
             }
-        } catch (e) {
+        } catch {
             // Parsing failed, ignore
         }
     }
@@ -33,7 +33,7 @@ export async function upsertTour(formData: FormData) {
     try {
         const parsed = JSON.parse(destIdsInput)
         if (Array.isArray(parsed)) destination_ids = parsed
-    } catch (e) { }
+    } catch { }
 
     // Fallback: if single destination_id was somehow passed
     if (destination_ids.length === 0 && formData.get('destination_id')) {
@@ -44,18 +44,37 @@ export async function upsertTour(formData: FormData) {
     const priceInput = formData.get('price') as string
     const price = priceInput === '' ? null : Number(priceInput)
 
-    const data = {
+    // Process duration string to days/nights
+    const durationStr = formData.get('duration') as string
+    let duration_days = 1 // Default
+    let duration_nights = 0
+
+    if (durationStr) {
+        const daysMatch = durationStr.match(/(\d+)\s*Day/i)
+        const nightsMatch = durationStr.match(/(\d+)\s*Night/i)
+        if (daysMatch) duration_days = parseInt(daysMatch[1])
+        if (nightsMatch) duration_nights = parseInt(nightsMatch[1])
+        // If just a number was entered, assume days
+        if (!daysMatch && !nightsMatch && !isNaN(Number(durationStr))) {
+            duration_days = parseInt(durationStr)
+        }
+    }
+
+    // Construct data object matching ACTUAL database schema (legacy)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = {
         title,
         slug,
-        // Use the first selected destination as the primary one for backward compatibility
-        destination_id: destination_ids.length > 0 ? destination_ids[0] : null,
-        price,
-        duration: formData.get('duration'),
+        // destination_id: removed as it does not exist in 'tours' table
+        price_adult: price, // Map 'price' to 'price_adult'
+        duration_days,
+        duration_nights,
         description: formData.get('description'),
-        highlights: (formData.get('highlights') as string)?.split('\n').filter(Boolean).map(s => s.trim()) || [],
-        cover_image: formData.get('cover_image'),
-        images: gallery_images, // DB column is 'images'
+        includes: (formData.get('highlights') as string)?.split('\n').filter(Boolean).map(s => s.trim()) || [], // Map highlights to includes
+        featured_image: formData.get('cover_image'), // Map cover_image to featured_image
+        gallery_images, // Map images to gallery_images
         status: formData.get('status'),
+        updated_at: new Date().toISOString(),
     }
 
     let error;
@@ -118,7 +137,7 @@ export async function upsertDestination(formData: FormData) {
             if (Array.isArray(parsed)) {
                 gallery_images = parsed
             }
-        } catch (e) {
+        } catch {
             // Parsing failed, ignore
         }
 

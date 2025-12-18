@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Hero } from "@/components/features/home/Hero";
 import { Stats } from "@/components/features/home/Stats";
-import { WhyUs } from "@/components/features/home/WhyUs";
+
 import { HowItWorks } from "@/components/features/home/HowItWorks";
 import { VietnamRegions } from "@/components/features/home/VietnamRegions";
 import { CulturalHighlights } from "@/components/features/home/CulturalHighlights";
@@ -24,12 +24,18 @@ export default async function Home() {
   const [
     { data: featuredTours },
     { data: destinations },
-    { data: latestPosts }
+    { data: latestPosts },
+    { data: sliders }
   ] = await Promise.all([
-    supabase.from('tours').select('*').eq('status', 'published').limit(3).order('created_at', { ascending: false }),
+    supabase.from('tours').select('*').eq('status', 'published').limit(4).order('created_at', { ascending: false }),
     // Fetch destinations
     supabase.from('destinations').select('*').eq('status', 'published').order('name', { ascending: true }),
-    supabase.from('blog_posts').select('*').eq('status', 'published').limit(3).order('created_at', { ascending: false })
+    supabase.from('blog_posts').select('*').eq('status', 'published').limit(4).order('created_at', { ascending: false }),
+    // Fetch active sliders
+    supabase.from('sliders')
+      .select('*, image:image_id(id, url, filename)')
+      .eq('status', 'active')
+      .order('display_order', { ascending: true })
   ])
 
   console.log('Home Page Debug - Tours:', featuredTours?.length || 0)
@@ -40,7 +46,7 @@ export default async function Home() {
 
   return (
     <>
-      <Hero />
+      <Hero sliders={sliders || []} />
       <Stats />
 
       <VietnamRegions />
@@ -62,7 +68,7 @@ export default async function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredTours && featuredTours.length > 0 ? (
               featuredTours.map((tour) => (
                 <TourCard key={tour.id} tour={tour} />
@@ -138,7 +144,7 @@ export default async function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {latestPosts?.map((post) => (
               <Link key={post.id} href={`/blog/${post.slug}`} className="group block">
                 <div className="aspect-[16/10] rounded-2xl overflow-hidden mb-4 relative">

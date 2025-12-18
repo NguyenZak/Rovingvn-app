@@ -1,9 +1,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { BookingForm } from '@/components/features/bookings/BookingForm'
-import { Clock, MapPin, Calendar, Check } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 
 // Force dynamic rendering to avoid build-time cookie access issues
 export const dynamic = 'force-dynamic'
@@ -15,23 +14,26 @@ export const dynamic = 'force-dynamic'
 //     return tours?.map(({ slug }) => ({ slug })) || []
 // }
 
-export default async function TourPage({ params }: { params: { slug: string } }) {
+export default async function TourPage(props: { params: Promise<{ slug: string }> }) {
+    const params = await props.params
     const supabase = await createClient()
 
     const { data: tour } = await supabase
         .from('tours')
-        .select('*, destinations(*)')
+        .select('*')
         .eq('slug', params.slug)
+        .eq('status', 'published')
         .single()
 
     if (!tour) {
         notFound()
     }
 
-    // Use array images or fallback
-    const images = tour.images && tour.images.length > 0
-        ? tour.images
-        : ['https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?q=80&w=2000']
+    // Use featured_image and gallery_images from schema
+    const images = [
+        tour.featured_image || 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?q=80&w=2000',
+        ...(tour.gallery_images || [])
+    ]
 
     return (
         <div className="bg-white min-h-screen">
@@ -45,13 +47,18 @@ export default async function TourPage({ params }: { params: { slug: string } })
                 <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white bg-gradient-to-t from-black/80 to-transparent">
                     <div className="container mx-auto">
                         <span className="inline-block bg-emerald-600 px-3 py-1 rounded-full text-sm font-bold mb-4">
-                            {tour.destinations?.name || 'Vietnam'}
+                            Vietnam Tour
                         </span>
                         <h1 className="text-4xl md:text-6xl font-bold mb-4">{tour.title}</h1>
                         <div className="flex flex-wrap gap-6 text-sm md:text-base opacity-90">
-                            <span className="flex items-center gap-2"><Clock size={18} /> {tour.duration}</span>
+                            <span className="flex items-center gap-2">
+                                <Clock size={18} />
+                                {tour.duration_days > 0 && `${tour.duration_days} ${tour.duration_days === 1 ? 'day' : 'days'}`}
+                                {tour.duration_nights > 0 && ` ${tour.duration_nights} ${tour.duration_nights === 1 ? 'night' : 'nights'}`}
+                            </span>
                             <span className="flex items-center gap-2 font-semibold text-emerald-300 text-lg">
-                                ${tour.price} <span className="text-white font-normal text-sm">/ person</span>
+                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: tour.currency || 'VND' }).format(tour.price_adult || 0)}
+                                <span className="text-white font-normal text-sm">/ người lớn</span>
                             </span>
                         </div>
                     </div>
@@ -73,13 +80,14 @@ export default async function TourPage({ params }: { params: { slug: string } })
                         </section>
 
                         {/* Itinerary (Handling JSONB) */}
-                        {tour.schedule && (
+                        {tour.itinerary && (
                             <section>
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Itinerary</h2>
                                 <div className="space-y-6 border-l-2 border-emerald-100 ml-3 pl-8 relative">
-                                    {/* Simplified rendering of schedule - normally requires strict type checking for JSON */}
-                                    {Array.isArray(tour.schedule) ? (
-                                        tour.schedule.map((item: any, idx: number) => (
+                                    {/* Simplified rendering of itinerary - normally requires strict type checking for JSON */}
+                                    {Array.isArray(tour.itinerary) ? (
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        tour.itinerary.map((item: any, idx: number) => (
                                             <div key={idx} className="relative">
                                                 <span className="absolute -left-[41px] top-0 flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 text-xs font-bold ring-4 ring-white">
                                                     {idx + 1}
@@ -100,9 +108,10 @@ export default async function TourPage({ params }: { params: { slug: string } })
                             <section>
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Gallery</h2>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {images.slice(1).map((img: string, i: number) => (
+                                    {images.slice(1).map((imgUrl: string, i: number) => (
                                         <div key={i} className="aspect-video rounded-xl overflow-hidden bg-gray-100">
-                                            <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={imgUrl} alt={`Gallery ${i}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                                         </div>
                                     ))}
                                 </div>

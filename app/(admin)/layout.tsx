@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import {
     LayoutDashboard, Map, Calendar, FileText, Settings, LogOut,
-    Users, MapPin, BarChart3, CalendarDays, Image
+    Users, MapPin, BarChart3, CalendarDays, Image, Compass
 } from 'lucide-react'
 import { signout } from '@/app/login/actions'
 import { Toaster } from 'sonner'
@@ -20,6 +20,7 @@ export default function AdminLayout({
         { href: '/admin/media', label: 'Media', icon: Image },
         { href: '/admin/bookings', label: 'Bookings', icon: Calendar },
         { href: '/admin/bookings/calendar', label: 'Calendar View', icon: CalendarDays },
+        { href: '/admin/custom-trips', label: 'Custom Trips', icon: Compass },
         { href: '/admin/customers', label: 'Customers', icon: Users },
         { href: '/admin/blog', label: 'Blog', icon: FileText },
         { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },

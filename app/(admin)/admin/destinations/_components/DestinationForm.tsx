@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, Save, MapPin, Image, FileText, Globe, Calendar, CloudRain } from 'lucide-react'
+import { Save, MapPin, Image as ImageIcon, Globe, Calendar, CloudRain } from 'lucide-react'
+import NextImage from 'next/image'
 import Link from 'next/link'
 import { upsertDestination } from '@/app/(admin)/admin/actions'
 import MediaPicker from '@/components/ui/MediaPicker'
@@ -9,16 +10,16 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 interface DestinationFormProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     destination?: any
     isNew: boolean
 }
 
-export default function DestinationForm({ destination, isNew }: DestinationFormProps) {
+export function DestinationForm({ destination, isNew }: DestinationFormProps) {
     const router = useRouter()
     const [imageUrl, setImageUrl] = useState(destination?.image_url || '')
-    const [galleryImages, setGalleryImages] = useState(destination?.gallery_images || '[]')
+    const [galleryImages] = useState(destination?.gallery_images || '[]')
 
-    // Helper to parse gallery images string/json
     const getGalleryUrls = () => {
         if (Array.isArray(galleryImages)) return galleryImages
         try {
@@ -158,7 +159,7 @@ export default function DestinationForm({ destination, isNew }: DestinationFormP
             {/* Images */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Image size={20} className="text-purple-600" />
+                    <ImageIcon size={20} className="text-purple-600" />
                     Images & Media
                 </h2>
                 <div className="space-y-6">
@@ -181,7 +182,13 @@ export default function DestinationForm({ destination, isNew }: DestinationFormP
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
                             {galleryUrls.map((url, index) => (
                                 <div key={index} className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200 bg-gray-50 shadow-sm">
-                                    <img src={url} alt={`Gallery ${index}`} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                    <NextImage
+                                        src={url}
+                                        alt={`Gallery ${index}`}
+                                        fill
+                                        className="object-cover transition-transform group-hover:scale-105"
+                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                    />
                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                                     <button
                                         type="button"

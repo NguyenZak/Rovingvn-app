@@ -1,13 +1,21 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, Image as ImageIcon, X, Loader2, Plus } from 'lucide-react'
+import { Upload, Image as ImageIcon, X, Loader2 } from 'lucide-react'
 import { uploadMedia } from '@/app/(admin)/admin/media/actions'
 import Image from 'next/image'
+
+export interface MediaItem {
+    id: string
+    url: string
+    filename: string
+    alt_text?: string
+}
 
 interface MediaPickerProps {
     value?: string | string[]
     onChange: (url: string | string[]) => void
+    onSelectMedia?: (media: MediaItem | MediaItem[]) => void
     label?: string
     name?: string
     children?: React.ReactNode // Custom trigger support
@@ -15,7 +23,7 @@ interface MediaPickerProps {
     multiple?: boolean
 }
 
-export default function MediaPicker({ value, onChange, label, name, children, compact = false, multiple = false }: MediaPickerProps) {
+export default function MediaPicker({ value, onChange, onSelectMedia, label, name, children, compact = false, multiple = false }: MediaPickerProps) {
     const [showLibrary, setShowLibrary] = useState(false)
     const [uploading, setUploading] = useState(false)
     const [media, setMedia] = useState<MediaItem[]>([])
@@ -28,6 +36,7 @@ export default function MediaPicker({ value, onChange, label, name, children, co
 
         setUploading(true)
         const uploadedUrls: string[] = []
+        const uploadedItems: MediaItem[] = []
         const errors: string[] = []
 
         // Process sequentially to simpler error handling, could be parallel
@@ -41,6 +50,13 @@ export default function MediaPicker({ value, onChange, label, name, children, co
 
             if (result.success && result.data) {
                 uploadedUrls.push(result.data.url)
+                // Construct MediaItem from result
+                uploadedItems.push({
+                    id: result.data.id,
+                    url: result.data.url,
+                    filename: file.name,
+                    alt_text: file.name
+                })
             } else {
                 errors.push(`${file.name}: ${result.error}`)
             }
@@ -52,18 +68,12 @@ export default function MediaPicker({ value, onChange, label, name, children, co
 
         if (uploadedUrls.length > 0) {
             if (multiple) {
-                // If multiple, trigger onChange with all new URLs
-                // Note: The parent component should handle merging if needed, 
-                // but usually onChange implies "here is the new value".
-                // However, for a picker adding to a list, we might just return the new ones.
-                // Let's assume onChange handles the array of NEW items if multiple is true
-                // OR checking the props type. 
-                // For this component 'onChange' with multiple usually means "add these".
-                // The parent (DestinationForm) expects `(url) => handleGalleryAdd(url)` currently.
-                // We need to support `onChange(urls: string[])`
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange(uploadedUrls as any)
+                if (onSelectMedia) onSelectMedia(uploadedItems)
             } else {
                 onChange(uploadedUrls[0])
+                if (onSelectMedia && uploadedItems.length > 0) onSelectMedia(uploadedItems[0])
             }
             setShowLibrary(false)
         }
@@ -93,10 +103,16 @@ export default function MediaPicker({ value, onChange, label, name, children, co
     const handleLibrarySelect = () => {
         if (selectedInLibrary.length === 0) return
 
+        // Find full objects for selected URLs
+        const selectedItems = media.filter(item => selectedInLibrary.includes(item.url))
+
         if (multiple) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onChange(selectedInLibrary as any)
+            if (onSelectMedia) onSelectMedia(selectedItems)
         } else {
             onChange(selectedInLibrary[0])
+            if (onSelectMedia && selectedItems.length > 0) onSelectMedia(selectedItems[0])
         }
         setShowLibrary(false)
     }
@@ -156,10 +172,11 @@ export default function MediaPicker({ value, onChange, label, name, children, co
             {/* Preview Area or Placeholder */}
             {value && !Array.isArray(value) ? (
                 <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden border border-gray-200 group bg-gray-50">
-                    <img
+                    <Image
                         src={value as string}
                         alt="Selected media"
-                        className="w-full h-full object-contain" // object-contain to see full image, or cover for aesthetics
+                        fill
+                        className="object-contain"
                     />
 
                     {/* Overlay Actions */}
@@ -236,12 +253,7 @@ export default function MediaPicker({ value, onChange, label, name, children, co
     )
 }
 
-interface MediaItem {
-    id: string
-    url: string
-    filename: string
-    alt_text?: string
-}
+
 
 interface MediaLibraryModalProps {
     show: boolean
@@ -350,7 +362,7 @@ function MediaLibraryModal({ show, onClose, media, loading, onSelect, selected =
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                            {media.map((item: any) => {
+                            {media.map((item: MediaItem) => {
                                 const isSelected = selected.includes(item.url)
                                 return (
                                     <button
@@ -361,11 +373,12 @@ function MediaLibraryModal({ show, onClose, media, loading, onSelect, selected =
                                         ${isSelected ? 'border-emerald-500 ring-2 ring-emerald-200' : 'border-gray-200 hover:border-emerald-300'}
                                     `}
                                     >
-                                        <img
+                                        <Image
                                             src={item.url}
                                             alt={item.alt_text || item.filename}
-                                            className="w-full h-full object-cover"
-                                            loading="lazy"
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
                                         />
                                         {isSelected && (
                                             <div className="absolute top-2 right-2 bg-emerald-500 text-white rounded-full p-1 shadow-sm z-10">
