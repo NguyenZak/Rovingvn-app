@@ -6,7 +6,8 @@ import { createClient } from '@/lib/supabase/server'
 // import { requireEditor } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Slider } from '@/lib/types/cms'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit } from 'lucide-react'
+import { DeleteSliderButton } from './DeleteSliderButton'
 
 export default async function SlidersPage() {
     // await requireEditor() // Temporarily disabled for testing
@@ -136,12 +137,10 @@ export default async function SlidersPage() {
                                             <Edit className="w-4 h-4" />
                                             Sửa
                                         </Link>
-                                        <button
-                                            className="flex-1 px-3 py-2 text-sm bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                            Xoá
-                                        </button>
+                                        <DeleteSliderButton
+                                            sliderId={slider.id}
+                                            sliderTitle={slider.title}
+                                        />
                                     </div>
                                 </div>
                             </div>
