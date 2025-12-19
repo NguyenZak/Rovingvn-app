@@ -30,7 +30,17 @@ export default async function Home() {
     supabase.from('tours').select('*').eq('status', 'published').limit(4).order('created_at', { ascending: false }),
     // Fetch destinations
     supabase.from('destinations').select('*').eq('status', 'published').order('name', { ascending: true }),
-    supabase.from('blog_posts').select('*').eq('status', 'published').limit(4).order('created_at', { ascending: false }),
+    // Fetch blog posts with media
+    supabase
+      .from('blog_posts')
+      .select(`
+        *,
+        cover_image:cover_image_id(id, url, filename),
+        thumbnail:thumbnail_id(id, url, filename)
+      `)
+      .eq('status', 'published')
+      .limit(4)
+      .order('created_at', { ascending: false }),
     // Fetch active sliders
     supabase.from('sliders')
       .select('*, image:image_id(id, url, filename)')
@@ -60,7 +70,7 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="flex items-end justify-between mb-12">
             <div className="max-w-2xl">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Popular Tours</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Popular Tours</h2>
               <p className="text-gray-600 text-lg">Our most loved itineraries by travelers from around the world.</p>
             </div>
             <Link href="/tours" className="hidden md:flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors group">
@@ -136,7 +146,7 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="flex items-end justify-between mb-12">
             <div className="max-w-2xl">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Travel Inspiration</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Travel Inspiration</h2>
               <p className="text-gray-600 text-lg">Tips, guides, and stories to help you plan your perfect trip.</p>
             </div>
             <Link href="/blog" className="hidden md:flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors group">
@@ -145,26 +155,31 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {latestPosts?.map((post) => (
-              <Link key={post.id} href={`/blog/${post.slug}`} className="group block">
-                <div className="aspect-[16/10] rounded-2xl overflow-hidden mb-4 relative">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${post.cover_image || 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021'})` }}
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
-                  <Calendar size={14} />
-                  {new Date(post.created_at).toLocaleDateString()}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
-                  {post.title}
-                </h3>
-                <p className="text-gray-500 line-clamp-2 text-sm">
-                  {post.excerpt}
-                </p>
-              </Link>
-            ))}
+            {latestPosts?.map((post) => {
+              // Get image URL from media library or fallback to direct URL
+              const imageUrl = post.thumbnail?.url || post.cover_image?.url || post.cover_image || post.featured_image || 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021'
+
+              return (
+                <Link key={post.id} href={`/blog/${post.slug}`} className="group block">
+                  <div className="aspect-[16/10] rounded-2xl overflow-hidden mb-4 relative">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                      style={{ backgroundImage: `url(${imageUrl})` }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                    <Calendar size={14} />
+                    {new Date(post.created_at).toLocaleDateString()}
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
+                    {post.title}
+                  </h3>
+                  <p className="text-gray-500 line-clamp-2 text-sm">
+                    {post.excerpt}
+                  </p>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>

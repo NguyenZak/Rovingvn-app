@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import { submitBooking } from '@/app/actions' // Reusing the submission logic
+import { submitGeneralInquiry } from '@/lib/actions/general-inquiry-actions'
 import { Send, CheckCircle, Loader2 } from 'lucide-react'
 
 export function HomeContactForm() {
@@ -16,12 +16,15 @@ export function HomeContactForm() {
         setError(null)
 
         const formData = new FormData(event.currentTarget)
-        // No tour_id for general inquiry
 
-        // We reuse submitBooking but it expects some fields
-        // We should ensure the server action handles null tour_id gracefully (which it does based on schema)
-
-        const result = await submitBooking(formData)
+        const result = await submitGeneralInquiry({
+            name: formData.get('name') as string,
+            email: formData.get('email') as string,
+            phone: formData.get('phone') as string,
+            number_of_people: parseInt(formData.get('people') as string) || 1,
+            subject: formData.get('subject') as string || undefined,
+            message: formData.get('message') as string || undefined
+        })
 
         setLoading(false)
         if (result.success) {
@@ -89,6 +92,11 @@ export function HomeContactForm() {
                         <div className="col-span-1">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Number of People</label>
                             <input required name="people" type="number" min="1" defaultValue="2" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white" />
+                        </div>
+
+                        <div className="col-span-full">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                            <input name="subject" type="text" placeholder="Tour inquiry, booking question, etc." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white" />
                         </div>
 
                         <div className="col-span-full">

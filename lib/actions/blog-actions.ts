@@ -71,7 +71,9 @@ export async function getAllPosts(params: {
             .from('blog_posts')
             .select(`
         *,
-        category:blog_categories(id, name, slug)
+        category:blog_categories(id, name, slug),
+        cover_image:cover_image_id(id, url, filename),
+        thumbnail:thumbnail_id(id, url, filename)
       `, { count: 'exact' });
 
         if (search) {
@@ -128,7 +130,9 @@ export async function getPostById(id: string) {
             .from('blog_posts')
             .select(`
         *,
-        category:blog_categories(id, name, slug)
+        category:blog_categories(id, name, slug),
+        cover_image:cover_image_id(id, url, filename),
+        thumbnail:thumbnail_id(id, url, filename)
       `)
             .eq('id', id)
             .single();
@@ -151,7 +155,9 @@ export async function getPostBySlug(slug: string) {
             .from('blog_posts')
             .select(`
         *,
-        category:blog_categories(id, name, slug)
+        category:blog_categories(id, name, slug),
+        cover_image:cover_image_id(id, url, filename),
+        thumbnail:thumbnail_id(id, url, filename)
       `)
             .eq('slug', slug)
             .eq('status', 'published')
@@ -210,7 +216,9 @@ export async function getRelatedPosts(categoryId: string, currentPostId: string,
         excerpt,
         featured_image,
         created_at,
-        category:blog_categories(id, name, slug)
+        category:blog_categories(id, name, slug),
+        cover_image:cover_image_id(id, url, filename),
+        thumbnail:thumbnail_id(id, url, filename)
       `)
             .eq('category_id', categoryId)
             .eq('status', 'published')
