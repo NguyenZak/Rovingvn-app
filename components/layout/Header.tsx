@@ -1,8 +1,8 @@
-
 'use client'
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, X, MapPin } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -19,7 +19,12 @@ const NAV_LINKS = [
     { href: '/contact', label: 'Contact' },
 ]
 
-export function Header() {
+interface HeaderProps {
+    siteName?: string
+    logoUrl?: string
+}
+
+export function Header({ siteName, logoUrl }: HeaderProps) {
     const [isScrolled, setIsScrolled] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -40,12 +45,25 @@ export function Header() {
         >
             <div className="container mx-auto px-4 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 group">
-                    <div className="bg-emerald-600 text-white p-2 rounded-lg group-hover:bg-emerald-700 transition-colors">
-                        <MapPin size={24} />
-                    </div>
-                    <span className={cn("text-xl font-bold tracking-tight", isScrolled ? "text-gray-900" : "text-white")}>
-                        Roving Việt Nam
-                    </span>
+                    {logoUrl ? (
+                        <Image
+                            src={logoUrl}
+                            alt={siteName || 'Logo'}
+                            width={180}
+                            height={60}
+                            className="h-10 w-auto object-contain"
+                            unoptimized
+                        />
+                    ) : (
+                        <>
+                            <div className="bg-emerald-600 text-white p-2 rounded-lg group-hover:bg-emerald-700 transition-colors">
+                                <MapPin size={24} />
+                            </div>
+                            <span className={cn("text-xl font-bold tracking-tight", isScrolled ? "text-gray-900" : "text-white")}>
+                                {siteName || 'Roving Việt Nam'}
+                            </span>
+                        </>
+                    )}
                 </Link>
 
                 {/* Desktop Nav */}

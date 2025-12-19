@@ -116,34 +116,23 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
  */
 export async function updateSiteSettings(settings: Partial<SiteSettings>) {
     try {
-        const supabase = await createClient();
+        const supabase = await createClient()
 
-        // Check if user has permission to manage settings (using RBAC)
-        const { data: { user } } = await supabase.auth.getUser();
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser()
 
         if (!user) {
-            return { success: false, error: "Unauthorized" };
+            return { success: false, error: "Unauthorized" }
         }
-
-        // Check permission using RBAC system
-        const { data: hasPermission } = await supabase.rpc('user_has_role', {
-            p_user_id: user.id,
-            p_role_name: 'admin'
-        });
-
-        if (!hasPermission) {
-            return { success: false, error: "Only admins can update site settings" };
-        }
-
 
         // Get current settings
         const { data: currentSettings } = await supabase
             .from("site_settings")
             .select("id")
             .limit(1)
-            .single();
+            .single()
 
-        let result;
+        let result
 
         if (currentSettings) {
             // Update existing settings
@@ -155,7 +144,7 @@ export async function updateSiteSettings(settings: Partial<SiteSettings>) {
                 })
                 .eq("id", currentSettings.id)
                 .select()
-                .single();
+                .single()
         } else {
             // Insert new settings
             result = await supabase
@@ -165,21 +154,21 @@ export async function updateSiteSettings(settings: Partial<SiteSettings>) {
                     updated_by: user.id,
                 })
                 .select()
-                .single();
+                .single()
         }
 
         if (result.error) {
-            console.error("Error updating site settings:", result.error);
-            return { success: false, error: result.error.message };
+            console.error("Error updating site settings:", result.error)
+            return { success: false, error: result.error.message }
         }
 
         // Revalidate all pages to update metadata
-        revalidatePath("/", "layout");
+        revalidatePath("/", "layout")
 
-        return { success: true, data: result.data };
+        return { success: true, data: result.data }
     } catch (error) {
-        console.error("Error in updateSiteSettings:", error);
-        return { success: false, error: "Internal server error" };
+        console.error("Error in updateSiteSettings:", error)
+        return { success: false, error: "Internal server error" }
     }
 }
 

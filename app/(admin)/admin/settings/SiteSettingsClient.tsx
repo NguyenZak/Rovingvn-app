@@ -15,7 +15,7 @@ import {
     updateSiteSettings,
     type SiteSettings
 } from "@/lib/actions/site-settings";
-import { LogoFaviconManager } from "./ImageUpload";
+import { AdvancedLogoFaviconManager } from "./AdvancedImageUpload";
 
 
 interface SiteSettingsClientProps {
@@ -234,7 +234,7 @@ export function SiteSettingsClient({ initialSettings }: SiteSettingsClientProps)
                 </div>
 
                 <div className="p-6">
-                    <LogoFaviconManager
+                    <AdvancedLogoFaviconManager
                         logos={{
                             main: initialSettings?.logo_main,
                             dark: initialSettings?.logo_dark,

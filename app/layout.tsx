@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro } from "next/font/google"; // Use Be Vietnam Pro
 import "./globals.css";
-import { generateMetadata, generateJsonLd, generateViewport } from "@/lib/metadata";
+import { generateJsonLd, generateViewport } from "@/lib/metadata";
+import { generateDynamicMetadata } from "@/lib/dynamic-metadata";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam-pro",
@@ -10,8 +11,11 @@ const beVietnamPro = Be_Vietnam_Pro({
   display: "swap",
 });
 
-// Generate metadata using the new metadata generator
-export const metadata: Metadata = generateMetadata();
+// Generate metadata dynamically from database
+export async function generateMetadata(): Promise<Metadata> {
+  return await generateDynamicMetadata();
+}
+
 export const viewport: Viewport = generateViewport();
 
 export default function RootLayout({
