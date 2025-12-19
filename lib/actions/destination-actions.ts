@@ -17,10 +17,11 @@ export interface Destination {
     short_description?: string;
     country?: string;
     region?: string;
-    featured_image?: string;
+    image_url?: string;
     gallery_images?: string[];
     best_time_to_visit?: string;
-    climate?: string;
+    climate_info?: string;
+    attractions?: string;
     currency?: string;
     language?: string;
     highlights?: string[];
@@ -104,6 +105,48 @@ export async function getDestinationById(id: string) {
             .from('destinations')
             .select('*')
             .eq('id', id)
+            .single();
+
+        if (error) return { success: false, error: error.message };
+
+        return { success: true, data: data as Destination };
+    } catch {
+        return { success: false, error: 'Failed to fetch destination' };
+    }
+}
+
+/**
+ * Get distinct regions for filtering
+ */
+export async function getDestinationRegions() {
+    try {
+        const supabase = await createClient();
+        const { data, error } = await supabase
+            .from('destinations')
+            .select('region')
+            .not('region', 'is', null)
+            .order('region');
+
+        if (error) return [];
+
+        // Return unique regions
+        const regions = Array.from(new Set(data.map(d => d.region).filter(Boolean)));
+        return regions;
+    } catch {
+        return [];
+    }
+}
+
+/**
+ * Get single destination by Slug
+ */
+export async function getDestinationBySlug(slug: string) {
+    try {
+        const supabase = await createClient();
+        const { data, error } = await supabase
+            .from('destinations')
+            .select('*')
+            .eq('slug', slug)
             .single();
 
         if (error) return { success: false, error: error.message };

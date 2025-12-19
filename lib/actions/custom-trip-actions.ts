@@ -59,29 +59,54 @@ export async function submitCustomTrip(data: CustomTripSubmission) {
             }
         }
 
+        // Build insert data, only include optional fields if they have values
+        const insertData: Record<string, unknown> = {
+            customer_name: data.customer_name,
+            customer_email: data.customer_email,
+            customer_phone: data.customer_phone,
+            destinations: data.destinations,
+            duration_days: data.duration_days,
+            travel_styles: data.travel_styles || [],
+            number_of_travelers: data.number_of_travelers || 1,
+            status: 'pending'
+        }
+
+        // Only add optional fields if they have values
+        if (data.travel_date) {
+            insertData.travel_date = data.travel_date
+        }
+        if (data.additional_notes) {
+            insertData.additional_notes = data.additional_notes
+        }
+
         // Insert into database
         const { data: result, error } = await supabase
             .from('custom_trips')
-            .insert({
-                customer_name: data.customer_name,
-                customer_email: data.customer_email,
-                customer_phone: data.customer_phone,
-                destinations: data.destinations,
-                duration_days: data.duration_days,
-                travel_date: data.travel_date || null,
-                travel_styles: data.travel_styles || [],
-                number_of_travelers: data.number_of_travelers || 1,
-                additional_notes: data.additional_notes || null,
-                status: 'pending'
-            })
+            .insert(insertData)
             .select()
             .single()
 
         if (error) {
-            console.error('Error submitting custom trip:', error)
+            console.error('❌ Database error submitting custom trip:', {
+                error,
+                errorMessage: error.message,
+                errorCode: error.code,
+                errorDetails: error.details,
+                errorHint: error.hint,
+                submittedData: {
+                    customer_name: data.customer_name,
+                    customer_email: data.customer_email,
+                    customer_phone: data.customer_phone,
+                    destinations: data.destinations,
+                    duration_days: data.duration_days,
+                    travel_date: data.travel_date,
+                    travel_styles: data.travel_styles,
+                    number_of_travelers: data.number_of_travelers
+                }
+            })
             return {
                 success: false,
-                error: 'Failed to submit your request. Please try again.'
+                error: `Failed to submit your request: ${error.message || 'Please try again.'}`
             }
         }
 
@@ -92,7 +117,13 @@ export async function submitCustomTrip(data: CustomTripSubmission) {
             data: result
         }
     } catch (error) {
-        console.error('Unexpected error:', error)
+        console.error('❌ Unexpected error in submitCustomTrip:', {
+            error,
+            errorMessage: error instanceof Error ? error.message : String(error),
+            errorStack: error instanceof Error ? error.stack : undefined,
+            errorType: typeof error,
+            submittedData: data
+        })
         return {
             success: false,
             error: 'An unexpected error occurred. Please try again.'

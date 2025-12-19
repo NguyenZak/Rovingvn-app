@@ -138,8 +138,8 @@ export function DestinationsClient({
                 {destinations.map(dest => (
                     <div key={dest.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
                         <div className="relative h-48 bg-gray-200">
-                            {dest.featured_image ? (
-                                <Image src={dest.featured_image} alt={dest.name} fill className="object-cover" />
+                            {dest.image_url ? (
+                                <Image src={dest.image_url} alt={dest.name} fill className="object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                                     <MapPin size={48} />

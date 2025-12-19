@@ -192,6 +192,50 @@ export async function getTourBySlug(slug: string) {
 }
 
 /**
+ * Get tours by Destination ID
+ */
+export async function getToursByDestinationId(destinationId: string) {
+    try {
+        const supabase = await createClient();
+
+        // 1. Get tour IDs first (Two-step fetch to avoid schema cache issues with joins)
+        const { data: tourDestinations, error: idError } = await supabase
+            .from('tour_destinations')
+            .select('tour_id')
+            .eq('destination_id', destinationId);
+
+        if (idError) {
+            console.error('Error fetching tour IDs:', idError);
+            return { success: false, error: idError.message };
+        }
+
+        const tourIds = tourDestinations?.map(td => td.tour_id) || [];
+
+        if (tourIds.length === 0) {
+            return { success: true, data: [] };
+        }
+
+        // 2. Fetch tours with those IDs
+        const { data: tours, error: toursError } = await supabase
+            .from('tours')
+            .select('*')
+            .in('id', tourIds)
+            .eq('status', 'published')
+            .order('title');
+
+        if (toursError) {
+            console.error('Error fetching tours:', toursError);
+            return { success: false, error: toursError.message };
+        }
+
+        return { success: true, data: tours as Tour[] };
+    } catch (e) {
+        console.error('Exception fetching tours by destination:', e);
+        return { success: false, error: 'Failed to fetch tours' };
+    }
+}
+
+/**
  * Helper function to sync tour-destination relationships
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

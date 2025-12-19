@@ -1,13 +1,18 @@
 
 import { CustomTripBuilder } from '@/components/features/custom-tour/CustomTripBuilder'
 import { Metadata } from 'next'
+import { getAllDestinations } from '@/lib/actions/destination-actions'
 
 export const metadata: Metadata = {
     title: 'Design Your Custom Trip | Roving Vietnam',
     description: 'Create your perfect Vietnam itinerary. Select your destinations, preferences, and let our experts handle the rest.',
 }
 
-export default function DesignYourTripPage() {
+export default async function DesignYourTripPage() {
+    const { data: destinations } = await getAllDestinations({
+        status: 'published',
+        limit: 100 // Get all published destinations
+    });
     return (
         <div className="bg-gray-50 min-h-screen">
             <div className="bg-emerald-900 py-16 text-white text-center">
@@ -18,7 +23,7 @@ export default function DesignYourTripPage() {
             </div>
 
             <div className="-mt-10">
-                <CustomTripBuilder />
+                <CustomTripBuilder destinations={destinations || []} />
             </div>
 
             <div className="container mx-auto px-4 py-16 text-center">

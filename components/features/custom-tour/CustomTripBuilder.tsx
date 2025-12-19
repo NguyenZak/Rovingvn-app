@@ -6,21 +6,17 @@ import Image from 'next/image'
 import { submitCustomTrip } from '@/lib/actions/custom-trip-actions'
 import { Check, MapPin, Calendar, Users, Briefcase, ChevronRight, ChevronLeft, Loader2, Send } from 'lucide-react'
 
-const DESTINATIONS = [
-    // North
-    { id: 'hanoi', name: 'Ha Noi', region: 'North', image: 'https://images.unsplash.com/photo-1599839556828-568ebbd75736?q=80&w=400' },
-    { id: 'halong', name: 'Ha Long Bay', region: 'North', image: 'https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=400' },
-    { id: 'sapa', name: 'Sapa', region: 'North', image: 'https://images.unsplash.com/photo-1531742617789-545233157e10?q=80&w=400' },
-    { id: 'ninhbinh', name: 'Ninh Binh', region: 'North', image: 'https://images.unsplash.com/photo-1596627885741-285627efc687?q=80&w=400' },
-    // Central
-    { id: 'hue', name: 'Hue', region: 'Central', image: 'https://images.unsplash.com/photo-1583597380961-460d36c28f32?q=80&w=400' },
-    { id: 'danang', name: 'Da Nang', region: 'Central', image: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?q=80&w=400' },
-    { id: 'hoian', name: 'Hoi An', region: 'Central', image: 'https://images.unsplash.com/photo-1565063670637-238478d15443?q=80&w=400' },
-    // South
-    { id: 'hcmc', name: 'Ho Chi Minh City', region: 'South', image: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=400' },
-    { id: 'mekong', name: 'Mekong Delta', region: 'South', image: 'https://images.unsplash.com/photo-1627393167123-238478d15443?q=80&w=400' },
-    { id: 'phuquoc', name: 'Phu Quoc', region: 'South', image: 'https://images.unsplash.com/photo-1540202404-a67b36c4b2b2?q=80&w=400' },
-]
+interface Destination {
+    id: string;
+    name: string;
+    region?: string;
+    image_url?: string;
+    image?: string; // fallback if image_url not present
+}
+
+interface CustomTripBuilderProps {
+    destinations: Destination[];
+}
 
 const STYLES = [
     { id: 'cultural', name: 'Cultural Exploration', icon: Briefcase },
@@ -29,7 +25,7 @@ const STYLES = [
     { id: 'food', name: 'Culinary Journey', icon: Users },
 ]
 
-export function CustomTripBuilder() {
+export function CustomTripBuilder({ destinations: inDestinations = [] }: CustomTripBuilderProps) {
     const [step, setStep] = useState(1)
     const [selectedDestinations, setSelectedDestinations] = useState<string[]>([])
     const [duration, setDuration] = useState('7')
@@ -58,7 +54,7 @@ export function CustomTripBuilder() {
         setError(null)
 
         // Build destinations array with full data
-        const destinations = DESTINATIONS
+        const destinations = inDestinations
             .filter(d => selectedDestinations.includes(d.id))
             .map(d => ({
                 id: d.id,
@@ -74,7 +70,7 @@ export function CustomTripBuilder() {
                 name: s.name
             }))
 
-        const result = await submitCustomTrip({
+        const submissionData = {
             customer_name: formData.name,
             customer_email: formData.email,
             customer_phone: formData.phone,
@@ -84,13 +80,34 @@ export function CustomTripBuilder() {
             travel_styles: travelStyles,
             number_of_travelers: parseInt(formData.people),
             additional_notes: formData.notes || undefined
-        })
+        }
 
-        setLoading(false)
-        if (result.success) {
-            setSuccess(true)
-        } else {
-            setError(result.error || 'Failed to submit inquiry')
+        console.log('🚀 Submitting custom trip request:', submissionData)
+
+        try {
+            const result = await submitCustomTrip(submissionData)
+
+            setLoading(false)
+            if (result.success) {
+                console.log('✅ Custom trip submitted successfully:', result.data)
+                setSuccess(true)
+            } else {
+                console.error('❌ Failed to submit custom trip:', {
+                    error: result.error,
+                    submissionData,
+                    fullResult: result
+                })
+                setError(result.error || 'Failed to submit inquiry')
+            }
+        } catch (err) {
+            console.error('❌ Unexpected error submitting custom trip:', {
+                error: err,
+                errorMessage: err instanceof Error ? err.message : String(err),
+                errorStack: err instanceof Error ? err.stack : undefined,
+                submissionData
+            })
+            setLoading(false)
+            setError('An unexpected error occurred. Please try again.')
         }
     }
 
@@ -138,7 +155,7 @@ export function CustomTripBuilder() {
                         <p className="text-gray-700 mb-8 font-medium">Select the destinations you are interested in visiting.</p>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto p-1">
-                            {DESTINATIONS.map((dest) => (
+                            {inDestinations.map((dest) => (
                                 <div
                                     key={dest.id}
                                     onClick={() => toggleDestination(dest.id)}
@@ -148,7 +165,18 @@ export function CustomTripBuilder() {
                                         }`}
                                 >
                                     <div className="aspect-square bg-gray-100 relative">
-                                        <Image src={dest.image} alt={dest.name} fill className="object-cover" />
+                                        {(dest.image_url || dest.image) ? (
+                                            <Image
+                                                src={dest.image_url || dest.image || ''}
+                                                alt={dest.name}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                                <MapPin className="text-gray-400 w-12 h-12" />
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                                     <div className="absolute bottom-3 left-3 text-white">

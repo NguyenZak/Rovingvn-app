@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS destinations (
   longitude DECIMAL(11, 8),
   
   -- Media
-  featured_image TEXT,
+  image_url TEXT,
   gallery_images JSONB DEFAULT '[]'::jsonb,
   
   -- Travel Info

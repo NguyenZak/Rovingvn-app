@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   -- Financials
   total_price DECIMAL(12, 2) NOT NULL DEFAULT 0,
   currency VARCHAR(10) DEFAULT 'VND',
+  
   payment_status VARCHAR(20) DEFAULT 'pending', -- pending, paid, partial, refunded
   payment_method VARCHAR(50),
   

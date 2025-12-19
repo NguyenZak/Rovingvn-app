@@ -43,7 +43,7 @@ export default function DestinationsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {destinations?.map((dest) => (
-                        <Link key={dest.id} href={`/tours?destination=${dest.slug}`} className="group relative rounded-2xl overflow-hidden aspect-[4/3] block">
+                        <Link key={dest.id} href={`/destinations/${dest.slug}`} className="group relative rounded-2xl overflow-hidden aspect-[4/3] block">
                             <div
                                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                                 style={{ backgroundImage: `url(${dest.image_url || 'https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2070'})` }}
