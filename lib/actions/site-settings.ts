@@ -57,6 +57,11 @@ export interface SiteSettings {
     theme_color?: string;
     background_color?: string;
 
+    // Hero Section
+    hero_title?: string;
+    hero_subtitle?: string;
+    hero_description?: string;
+
     // Business
     business_type?: string;
     business_legal_name?: string;

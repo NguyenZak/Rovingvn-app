@@ -71,6 +71,12 @@ export function SiteSettingsClient({ initialSettings }: SiteSettingsClientProps)
         business_vat_id: initialSettings?.business_vat_id || "",
     });
 
+    const [hero, setHero] = useState({
+        hero_title: initialSettings?.hero_title || "",
+        hero_subtitle: initialSettings?.hero_subtitle || "",
+        hero_description: initialSettings?.hero_description || "",
+    });
+
     const handleSaveAll = () => {
         setError(null);
         startTransition(async () => {
@@ -81,6 +87,7 @@ export function SiteSettingsClient({ initialSettings }: SiteSettingsClientProps)
                 ...seo,
                 ...analytics,
                 ...business,
+                ...hero,
                 meta_keywords: seo.meta_keywords.split(",").map(k => k.trim()).filter(Boolean),
             });
 
@@ -529,6 +536,60 @@ export function SiteSettingsClient({ initialSettings }: SiteSettingsClientProps)
                                 placeholder="verification code"
                             />
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Hero Section */}
+            <section className="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div className="p-6 border-b border-gray-100 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <ImageIcon size={20} className="text-emerald-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900">Hero Section</h2>
+                        <p className="text-sm text-gray-500">Phần "A Land of Timeless Charm" trên trang chủ</p>
+                    </div>
+                </div>
+
+                <div className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Tiêu đề nhỏ (Hero Title)
+                        </label>
+                        <input
+                            type="text"
+                            value={hero.hero_title}
+                            onChange={(e) => setHero({ ...hero, hero_title: e.target.value })}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            placeholder="Why Vietnam?"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Tiêu đề chính (Hero Subtitle)
+                        </label>
+                        <input
+                            type="text"
+                            value={hero.hero_subtitle}
+                            onChange={(e) => setHero({ ...hero, hero_subtitle: e.target.value })}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            placeholder="A Land of Timeless Charm"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Mô tả (Hero Description)
+                        </label>
+                        <textarea
+                            value={hero.hero_description}
+                            onChange={(e) => setHero({ ...hero, hero_description: e.target.value })}
+                            rows={4}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            placeholder="Vietnam is a country of breathtaking natural beauty and unique heritage..."
+                        />
                     </div>
                 </div>
             </section>

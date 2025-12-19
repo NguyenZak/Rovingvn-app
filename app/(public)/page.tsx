@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSiteSettings } from '@/lib/actions/site-settings'
 import { Hero } from "@/components/features/home/Hero";
 import { Stats } from "@/components/features/home/Stats";
 
@@ -25,7 +26,8 @@ export default async function Home() {
     { data: featuredTours },
     { data: destinations },
     { data: latestPosts },
-    { data: sliders }
+    { data: sliders },
+    settings
   ] = await Promise.all([
     supabase.from('tours').select('*').eq('status', 'published').limit(4).order('created_at', { ascending: false }),
     // Fetch destinations
@@ -42,10 +44,16 @@ export default async function Home() {
       .limit(4)
       .order('created_at', { ascending: false }),
     // Fetch active sliders
-    supabase.from('sliders')
-      .select('*, image:image_id(id, url, filename)')
+    supabase
+      .from('sliders')
+      .select(`
+        *,
+        image:image_id(id, url, filename, alt_text)
+      `)
       .eq('status', 'active')
-      .order('display_order', { ascending: true })
+      .order('display_order', { ascending: true }),
+    // Fetch site settings
+    getSiteSettings()
   ])
 
   console.log('Home Page Debug - Tours:', featuredTours?.length || 0)
@@ -99,7 +107,11 @@ export default async function Home() {
         </div>
       </section>
 
-      <CulturalHighlights />
+      <CulturalHighlights
+        heroTitle={settings?.hero_title}
+        heroSubtitle={settings?.hero_subtitle}
+        heroDescription={settings?.hero_description}
+      />
 
       {/* Popular Destinations Section */}
       <section className="py-20 md:py-24 bg-gray-50">

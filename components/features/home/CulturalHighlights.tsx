@@ -1,4 +1,3 @@
-
 import { Utensils, Building2, Palmtree, Users } from 'lucide-react'
 import Image from 'next/image'
 
@@ -33,7 +32,17 @@ const HIGHLIGHTS = [
     }
 ]
 
-export function CulturalHighlights() {
+interface CulturalHighlightsProps {
+    heroTitle?: string
+    heroSubtitle?: string
+    heroDescription?: string
+}
+
+export function CulturalHighlights({
+    heroTitle = "Why Vietnam?",
+    heroSubtitle = "A Land of Timeless Charm",
+    heroDescription = "Vietnam is a country of breathtaking natural beauty and unique heritage. From the jagged peaks of the north to the emerald waters of the south, every corner tells a story."
+}: CulturalHighlightsProps) {
     return (
         <section className="py-20 md:py-24 bg-white">
             <div className="container mx-auto px-4">
@@ -61,10 +70,10 @@ export function CulturalHighlights() {
                     </div>
 
                     <div className="w-full md:w-1/2">
-                        <h4 className="text-emerald-600 font-bold uppercase tracking-wider text-sm mb-2">Why Vietnam?</h4>
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">A Land of Timeless Charm</h2>
+                        <h4 className="text-emerald-600 font-bold uppercase tracking-wider text-sm mb-2">{heroTitle}</h4>
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{heroSubtitle}</h2>
                         <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-                            Vietnam is a country of breathtaking natural beauty and unique heritage. From the jagged peaks of the north to the emerald waters of the south, every corner tells a story.
+                            {heroDescription}
                         </p>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
