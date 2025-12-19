@@ -133,18 +133,59 @@ export function CustomTripBuilder({ destinations: inDestinations = [] }: CustomT
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-12">
-            {/* Progress Bar */}
-            <div className="flex items-center justify-between mb-12 relative">
-                <div className="absolute left-0 right-0 top-1/2 h-1 bg-gray-200 -z-10" />
-                {[1, 2, 3, 4].map((s) => (
+            {/* Premium Progress Stepper */}
+            <div className="mb-16">
+                <div className="flex items-center justify-between relative">
+                    {/* Progress Line */}
+                    <div className="absolute left-0 right-0 top-5 h-1 bg-gray-200 -z-10"
+                        style={{ left: '5%', right: '5%' }} />
                     <div
-                        key={s}
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${step >= s ? 'bg-emerald-600 text-white' : 'bg-white border-2 border-gray-200 text-gray-500'
-                            }`}
-                    >
-                        {s}
-                    </div>
-                ))}
+                        className="absolute left-0 top-5 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 -z-10 transition-all duration-500"
+                        style={{
+                            left: '5%',
+                            width: `${((step - 1) / 3) * 90}%`
+                        }}
+                    />
+
+                    {/* Steps */}
+                    {[
+                        { num: 1, label: 'Destinations', icon: MapPin },
+                        { num: 2, label: 'Duration & Date', icon: Calendar },
+                        { num: 3, label: 'Travel Style', icon: Briefcase },
+                        { num: 4, label: 'Your Details', icon: Users }
+                    ].map((s) => (
+                        <div key={s.num} className="flex flex-col items-center flex-1">
+                            {/* Circle */}
+                            <div className={`
+                                relative w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm 
+                                transition-all duration-300 shadow-lg
+                                ${step >= s.num
+                                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white scale-110'
+                                    : 'bg-white border-2 border-gray-300 text-gray-400 scale-100'
+                                }
+                            `}>
+                                {step > s.num ? (
+                                    <Check size={20} className="animate-in zoom-in duration-300" />
+                                ) : (
+                                    <s.icon size={20} />
+                                )}
+
+                                {/* Pulse effect for active step */}
+                                {step === s.num && (
+                                    <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-20" />
+                                )}
+                            </div>
+
+                            {/* Label */}
+                            <span className={`
+                                mt-3 text-xs md:text-sm font-medium text-center transition-colors duration-300
+                                ${step >= s.num ? 'text-emerald-600' : 'text-gray-400'}
+                            `}>
+                                {s.label}
+                            </span>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-10 min-h-[400px]">
