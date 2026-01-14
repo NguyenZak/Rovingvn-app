@@ -107,7 +107,11 @@ export async function uploadMedia(formData: FormData): Promise<APIResponse<{ id:
         }
     } catch (error) {
         console.error('Upload media error:', error)
-        return { success: false, error: 'Có lỗi xảy ra: ' + (error as Error).message }
+        return {
+            success: false,
+            error: 'Có lỗi xảy ra: ' + (error as Error).message +
+                `. (Debug: CloudName=${!!process.env.CLOUDINARY_CLOUD_NAME}, Key=${!!process.env.CLOUDINARY_API_KEY}, Secret=${!!process.env.CLOUDINARY_API_SECRET})`
+        }
     }
 }
 
