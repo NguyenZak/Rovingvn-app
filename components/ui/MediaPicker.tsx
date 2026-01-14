@@ -393,7 +393,7 @@ function MediaLibraryModal({ show, onClose, media, loading, onSelect, selected =
                 </div>
 
                 {/* Toolbar */}
-                <div className="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+                <div className="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center relative">
                     <div className="text-sm text-gray-500">
                         {media.length} items found
                     </div>

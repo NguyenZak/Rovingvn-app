@@ -42,37 +42,80 @@ export default function MediaLibraryClient({ initialMedia }: MediaLibraryClientP
         }, 3000)
     }
 
+    const [currentUpload, setCurrentUpload] = useState<{ filename: string, progress: number } | null>(null)
+
     const handleUpload = async (files: FileList | null) => {
         if (!files || files.length === 0) return
 
         setUploading(true)
 
         for (const file of Array.from(files)) {
-            const formData = new FormData()
-            formData.append('file', file)
-            formData.append('alt_text', file.name)
+            setCurrentUpload({ filename: file.name, progress: 0 })
 
-            const result = await uploadMedia(formData)
+            try {
+                // Use XHR for progress tracking
+                const result = await new Promise<{ success: boolean, data?: MediaItem, error?: string }>((resolve, reject) => {
+                    const xhr = new XMLHttpRequest()
+                    const formData = new FormData()
+                    formData.append('file', file)
+                    formData.append('alt_text', file.name)
+                    formData.append('folder', 'roving-vietnam/media')
 
-            if (result.success && result.data) {
-                // Add to local state
-                const newMedia: MediaItem = {
-                    id: result.data.id,
-                    filename: file.name,
-                    url: result.data.url,
-                    mime_type: file.type,
-                    file_size: file.size,
-                    alt_text: file.name,
-                    created_at: new Date().toISOString()
+                    xhr.upload.onprogress = (event) => {
+                        if (event.lengthComputable) {
+                            const percentComplete = Math.round((event.loaded / event.total) * 100)
+                            setCurrentUpload({ filename: file.name, progress: percentComplete })
+                        }
+                    }
+
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                const response = JSON.parse(xhr.responseText)
+                                resolve(response)
+                            } catch (e) {
+                                reject('Invalid response format')
+                            }
+                        } else {
+                            try {
+                                const response = JSON.parse(xhr.responseText)
+                                reject(response.error || 'Upload failed')
+                            } catch {
+                                reject('Upload failed')
+                            }
+                        }
+                    }
+
+                    xhr.onerror = () => reject('Network error')
+
+                    xhr.open('POST', '/api/media/upload')
+                    xhr.send(formData)
+                })
+
+                if (result.success && result.data) {
+                    // Add to local state
+                    const newMedia: MediaItem = {
+                        id: result.data.id,
+                        filename: file.name,
+                        url: result.data.url,
+                        mime_type: file.type || 'image/jpeg',
+                        file_size: file.size,
+                        alt_text: file.name,
+                        created_at: new Date().toISOString()
+                    }
+                    setMedia(prev => [newMedia, ...prev])
+                    showToast('success', `Đã tải lên: ${file.name}`)
+                } else {
+                    showToast('error', result.error || 'Tải lên thất bại')
                 }
-                setMedia(prev => [newMedia, ...prev])
-                showToast('success', `Đã tải lên: ${file.name}`)
-            } else {
-                showToast('error', result.error || 'Tải lên thất bại')
+            } catch (error) {
+                showToast('error', `Lỗi tải lên: ${file.name}`)
             }
         }
 
+        setCurrentUpload(null)
         setUploading(false)
+        if (fileInputRef.current) fileInputRef.current.value = ''
     }
 
     const handleDelete = async (mediaId: string) => {
@@ -159,9 +202,17 @@ export default function MediaLibraryClient({ initialMedia }: MediaLibraryClientP
                 </p>
 
                 {uploading && (
-                    <div className="mt-4">
-                        <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-                        <p className="text-sm text-gray-500 mt-2">Đang tải lên...</p>
+                    <div className="mt-4 max-w-md mx-auto">
+                        <div className="flex justify-between text-sm text-gray-600 mb-2">
+                            <span>{currentUpload?.filename || 'Đang tải lên...'}</span>
+                            <span>{currentUpload?.progress || 0}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                            <div
+                                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                                style={{ width: `${currentUpload?.progress || 0}%` }}
+                            ></div>
+                        </div>
                     </div>
                 )}
             </div>
