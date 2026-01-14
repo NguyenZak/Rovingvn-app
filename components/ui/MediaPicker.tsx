@@ -47,44 +47,79 @@ export default function MediaPicker({ value, onChange, onSelectMedia, label, nam
             const file = files[i]
 
             try {
-                // Use XHR for progress tracking
+                // 1. Get Signature
+                const signRes = await fetch('/api/media/sign', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        folder: 'roving-vietnam/media'
+                    })
+                })
+
+                if (!signRes.ok) throw new Error('Failed to get upload signature')
+                const signData = await signRes.json()
+                const { signature, timestamp, cloud_name, api_key, folder } = signData.data
+
+                // 2. Upload to Cloudinary
                 const result = await new Promise<{ success: boolean, data?: MediaItem, error?: string }>((resolve, reject) => {
                     const xhr = new XMLHttpRequest()
                     const formData = new FormData()
                     formData.append('file', file)
-                    formData.append('alt_text', file.name)
-                    formData.append('folder', 'roving-vietnam/media')
+                    formData.append('api_key', api_key)
+                    formData.append('timestamp', timestamp.toString())
+                    formData.append('signature', signature)
+                    formData.append('folder', folder)
 
                     xhr.upload.onprogress = (event) => {
                         if (event.lengthComputable) {
                             const percentComplete = Math.round((event.loaded / event.total) * 100)
-                            // For sequential uploads, we can just show progress of current file
-                            // or average implementation. For simplicity, showing current file progress.
                             setUploadProgress(percentComplete)
                         }
                     }
 
-                    xhr.onload = () => {
+                    xhr.onload = async () => {
                         if (xhr.status >= 200 && xhr.status < 300) {
                             try {
                                 const response = JSON.parse(xhr.responseText)
-                                resolve(response)
+
+                                // 3. Save to Backend
+                                const saveRes = await fetch('/api/media/upload', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        public_id: response.public_id,
+                                        secure_url: response.secure_url,
+                                        filename: file.name,
+                                        mime_type: file.type,
+                                        bytes: response.bytes,
+                                        width: response.width,
+                                        height: response.height,
+                                        alt_text: file.name
+                                    })
+                                })
+
+                                if (saveRes.ok) {
+                                    const savedData = await saveRes.json()
+                                    resolve(savedData)
+                                } else {
+                                    reject('Failed to save to database')
+                                }
+
                             } catch (e) {
-                                reject('Invalid response format')
+                                reject('Invalid response from Cloudinary')
                             }
                         } else {
                             try {
                                 const response = JSON.parse(xhr.responseText)
-                                reject(response.error || 'Upload failed')
+                                reject(response.error?.message || 'Upload failed')
                             } catch {
                                 reject('Upload failed')
                             }
                         }
                     }
 
-                    xhr.onerror = () => reject('Network error')
+                    xhr.onerror = () => reject('Network error during upload')
 
-                    xhr.open('POST', '/api/media/upload')
+                    xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`)
                     xhr.send(formData)
                 })
 
@@ -95,7 +130,8 @@ export default function MediaPicker({ value, onChange, onSelectMedia, label, nam
                     errors.push(`${file.name}: ${result.error}`)
                 }
             } catch (error) {
-                errors.push(`${file.name}: ${error}`)
+                const msg = error instanceof Error ? error.message : String(error)
+                errors.push(`${file.name}: ${msg}`)
             }
         }
 
