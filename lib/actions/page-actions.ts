@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createPublicClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export interface PageContent {
@@ -20,7 +20,7 @@ export interface PageContent {
  */
 export async function getPageContent(slug: string) {
     try {
-        const supabase = await createClient()
+        const supabase = await createPublicClient()
 
         const { data, error } = await supabase
             .from('page_content')
