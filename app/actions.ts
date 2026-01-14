@@ -3,27 +3,117 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import nodemailer from 'nodemailer'
+import { render } from '@react-email/components'
+import BookingConfirmationEmail from '@/components/emails/BookingConfirmationEmail'
+import { sendTelegramMessage } from '@/lib/telegram'
 
 export async function submitBooking(formData: FormData) {
     const supabase = await createClient()
 
+    const tourId = formData.get('tour_id') as string
+
+    // Fetch Tour Details for Email
+    const { data: tour } = await supabase
+        .from('tours')
+        .select('title')
+        .eq('id', tourId)
+        .single()
+
+    const tourName = tour?.title || 'Vietnam Tour'
+
     const data = {
-        tour_id: formData.get('tour_id'),
-        customer_name: formData.get('name'),
-        customer_email: formData.get('email'),
-        customer_phone: formData.get('phone'),
+        tour_id: tourId,
+        customer_name: formData.get('name') as string,
+        customer_email: formData.get('email') as string,
+        customer_phone: formData.get('phone') as string,
         people_count: Number(formData.get('people')),
-        start_date: formData.get('date'),
-        message: formData.get('message'),
+        start_date: formData.get('date') as string,
+        message: formData.get('message') as string,
         status: 'pending',
     }
 
     const { error } = await supabase.from('bookings').insert(data)
 
     if (error) {
-        return { error: error.message }
+        console.error('Database Error:', error)
+        return { error: 'Failed to submit booking' }
     }
 
-    revalidatePath('/tours') // Optional: revalidate relevant paths
+    console.log('✅ Booking submitted successfully')
+
+    // --- Send Emails ---
+    try {
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.GMAIL_USER,
+                pass: process.env.GMAIL_APP_PASSWORD,
+            },
+        })
+
+        const adminEmail = 'rovingvietnamtravel@gmail.com'
+
+        // Render Email
+        const emailHtml = await render(BookingConfirmationEmail({
+            customerName: data.customer_name,
+            tourName: tourName,
+            date: data.start_date,
+            peopleCount: data.people_count,
+            phone: data.customer_phone
+        }))
+
+        // 1. Send Confirmation to Customer
+        await transporter.sendMail({
+            from: `"Roving Vietnam Travel" <${process.env.GMAIL_USER}>`,
+            to: data.customer_email,
+            replyTo: adminEmail,
+            subject: `Booking Request Received: ${tourName}`,
+            html: emailHtml,
+        })
+
+        // 2. Send Notification to Admin
+        await transporter.sendMail({
+            from: `"New Booking" <${process.env.GMAIL_USER}>`,
+            to: adminEmail,
+            replyTo: data.customer_email,
+            subject: `New Booking: ${tourName} - ${data.customer_name}`,
+            html: `
+                <h1>New Tour Booking</h1>
+                <p><strong>Tour:</strong> ${tourName}</p>
+                <p><strong>Name:</strong> ${data.customer_name}</p>
+                <p><strong>Email:</strong> ${data.customer_email}</p>
+                <p><strong>Phone:</strong> ${data.customer_phone}</p>
+                <p><strong>Date:</strong> ${data.start_date}</p>
+                <p><strong>People:</strong> ${data.people_count}</p>
+                <p><strong>Message:</strong></p>
+                <blockquote style="background: #eee; padding: 10px;">${data.message || 'No message'}</blockquote>
+            `
+        })
+
+        console.log('✅ Booking emails sent')
+    } catch (err) {
+        console.error('⚠️ Email Error:', err)
+    }
+
+    // --- Send Telegram ---
+    try {
+        const telegramMsg = `
+<b>🎫 New Booking Received</b>
+<b>Tour:</b> ${tourName}
+<b>Name:</b> ${data.customer_name}
+<b>Email:</b> ${data.customer_email}
+<b>Phone:</b> ${data.customer_phone}
+<b>Date:</b> ${data.start_date}
+<b>People:</b> ${data.people_count}
+<b>Message:</b> ${data.message || 'No message'}
+`
+        await sendTelegramMessage(telegramMsg)
+        console.log('✅ Telegram sent')
+    } catch (err) {
+        console.error('⚠️ Telegram Error:', err)
+    }
+
+    revalidatePath('/tours')
     return { success: true }
 }
