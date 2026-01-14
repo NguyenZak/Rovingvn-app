@@ -32,6 +32,27 @@ export async function createClient() {
 }
 
 /**
+ * Create a public Supabase client (no cookies/auth)
+ * Use this for static generation or public data fetching
+ */
+export async function createPublicClient() {
+    return createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return []
+                },
+                setAll() {
+                    // No-op
+                },
+            },
+        }
+    )
+}
+
+/**
  * Get current authenticated user
  */
 export async function getUser() {

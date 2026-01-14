@@ -5,7 +5,7 @@
 
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createPublicClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export interface SiteSettings {
@@ -95,7 +95,7 @@ export interface SiteSettings {
  */
 export async function getSiteSettings(): Promise<SiteSettings | null> {
     try {
-        const supabase = await createClient();
+        const supabase = await createPublicClient();
 
         const { data, error } = await supabase
             .from("site_settings")
