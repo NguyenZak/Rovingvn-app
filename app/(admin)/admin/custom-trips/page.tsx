@@ -1,6 +1,7 @@
 import { getAllCustomTrips } from '@/lib/actions/custom-trip-actions'
 import Link from 'next/link'
 import { Calendar, Mail, MapPin, Phone, User, Eye } from 'lucide-react'
+import DeleteCustomTripButton from '@/components/features/cms/DeleteCustomTripButton'
 
 export const metadata = {
     title: 'Custom Trip Requests | Roving Admin',
@@ -104,13 +105,16 @@ export default async function CustomTripsPage() {
                                         {new Date(trip.created_at).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <Link
-                                            href={`/admin/custom-trips/${trip.id}`}
-                                            className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-medium text-sm"
-                                        >
-                                            <Eye size={16} />
-                                            View Details
-                                        </Link>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Link
+                                                href={`/admin/custom-trips/${trip.id}`}
+                                                className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="View/Edit Details"
+                                            >
+                                                <Eye size={18} />
+                                            </Link>
+                                            <DeleteCustomTripButton id={trip.id} />
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

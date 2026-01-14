@@ -150,6 +150,11 @@ export default function MediaPicker({ value, onChange, onSelectMedia, label, nam
                             )
                         } else {
                             onChange(url)
+                            // Find and pass the full media object
+                            const selectedItem = media.find(item => item.url === url)
+                            if (selectedItem && onSelectMedia) {
+                                onSelectMedia(selectedItem)
+                            }
                             setShowLibrary(false)
                         }
                     }}
@@ -239,6 +244,11 @@ export default function MediaPicker({ value, onChange, onSelectMedia, label, nam
                         )
                     } else {
                         onChange(url)
+                        // Find and pass the full media object
+                        const selectedItem = media.find(item => item.url === url)
+                        if (selectedItem && onSelectMedia) {
+                            onSelectMedia(selectedItem)
+                        }
                         setShowLibrary(false)
                     }
                 }}

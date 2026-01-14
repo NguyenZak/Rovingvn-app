@@ -214,3 +214,28 @@ export async function updateCustomTrip(
         return { success: false, error: 'Failed to update custom trip' }
     }
 }
+
+/**
+ * Delete a custom trip request (Admin only)
+ */
+export async function deleteCustomTrip(id: string) {
+    try {
+        const supabase = await createClient()
+
+        const { error } = await supabase
+            .from('custom_trips')
+            .delete()
+            .eq('id', id)
+
+        if (error) {
+            console.error('Error deleting custom trip:', error)
+            return { success: false, error: error.message }
+        }
+
+        revalidatePath('/admin/custom-trips')
+        return { success: true }
+    } catch (error) {
+        console.error('Unexpected error:', error)
+        return { success: false, error: 'Failed to delete custom trip' }
+    }
+}

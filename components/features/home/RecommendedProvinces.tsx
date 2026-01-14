@@ -83,7 +83,7 @@ export function RecommendedProvinces({ destinations }: RecommendedProvincesProps
                     {items.map((province, i) => (
                         <Link
                             key={province.id || i}
-                            href={`/tours?destination=${province.slug || province.name.toLowerCase()}`}
+                            href={`/destinations/${province.slug || province.name.toLowerCase()}`}
                             className="flex-shrink-0 w-[280px] md:w-[320px] scroll-snap-align-start group block"
                         >
                             <div className="relative aspect-[4/5] rounded-3xl overflow-hidden mb-4">

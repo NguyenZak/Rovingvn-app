@@ -210,19 +210,33 @@ export default function SliderForm({ slider }: SliderFormProps) {
                             }
                         }}
                     >
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-colors">
-                            <p className="text-gray-500 text-sm font-medium">
-                                Chọn ảnh từ Media Library hoặc tải lên
-                            </p>
-                            <p className="text-xs text-gray-400 mt-1">
-                                Hỗ trợ: JPG, PNG, WebP
-                            </p>
-                            {!previewUrl && formData.image_id && (
-                                <p className="text-xs text-blue-500 mt-2">
-                                    Đang sử dụng ảnh ID: {formData.image_id}
+                        {previewUrl ? (
+                            <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200 group">
+                                {/* Using Next.js Image for optimization, or simple img tag if simpler */}
+                                <img
+                                    src={previewUrl}
+                                    alt="Slider preview"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium">
+                                    Nhấn để thay đổi ảnh
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-colors">
+                                <p className="text-gray-500 text-sm font-medium">
+                                    Chọn ảnh từ Media Library hoặc tải lên
                                 </p>
-                            )}
-                        </div>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    Hỗ trợ: JPG, PNG, WebP
+                                </p>
+                                {!previewUrl && formData.image_id && (
+                                    <p className="text-xs text-blue-500 mt-2">
+                                        Đang sử dụng ảnh ID: {formData.image_id}
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </MediaPicker>
                 </div>
                 {/* Hidden input to ensure ID is submitted if needed manually? No, state handles it */}
