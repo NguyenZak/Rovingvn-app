@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import { Upload, Image as ImageIcon, X, Loader2 } from 'lucide-react'
-import { uploadMedia } from '@/app/(admin)/admin/media/actions'
 import Image from 'next/image'
 
 export interface MediaItem {
@@ -31,34 +30,72 @@ export default function MediaPicker({ value, onChange, onSelectMedia, label, nam
     const [selectedInLibrary, setSelectedInLibrary] = useState<string[]>([])
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    const [uploadProgress, setUploadProgress] = useState(0)
+
     const handleUpload = async (files: FileList | null) => {
         if (!files || files.length === 0) return
 
         setUploading(true)
+        setUploadProgress(0)
+
         const uploadedUrls: string[] = []
         const uploadedItems: MediaItem[] = []
         const errors: string[] = []
 
-        // Process sequentially to simpler error handling, could be parallel
+        // Process sequentially
         for (let i = 0; i < files.length; i++) {
             const file = files[i]
-            const formData = new FormData()
-            formData.append('file', file)
-            formData.append('alt_text', file.name)
 
-            const result = await uploadMedia(formData)
+            try {
+                // Use XHR for progress tracking
+                const result = await new Promise<{ success: boolean, data?: MediaItem, error?: string }>((resolve, reject) => {
+                    const xhr = new XMLHttpRequest()
+                    const formData = new FormData()
+                    formData.append('file', file)
+                    formData.append('alt_text', file.name)
+                    formData.append('folder', 'roving-vietnam/media')
 
-            if (result.success && result.data) {
-                uploadedUrls.push(result.data.url)
-                // Construct MediaItem from result
-                uploadedItems.push({
-                    id: result.data.id,
-                    url: result.data.url,
-                    filename: file.name,
-                    alt_text: file.name
+                    xhr.upload.onprogress = (event) => {
+                        if (event.lengthComputable) {
+                            const percentComplete = Math.round((event.loaded / event.total) * 100)
+                            // For sequential uploads, we can just show progress of current file
+                            // or average implementation. For simplicity, showing current file progress.
+                            setUploadProgress(percentComplete)
+                        }
+                    }
+
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                const response = JSON.parse(xhr.responseText)
+                                resolve(response)
+                            } catch (e) {
+                                reject('Invalid response format')
+                            }
+                        } else {
+                            try {
+                                const response = JSON.parse(xhr.responseText)
+                                reject(response.error || 'Upload failed')
+                            } catch {
+                                reject('Upload failed')
+                            }
+                        }
+                    }
+
+                    xhr.onerror = () => reject('Network error')
+
+                    xhr.open('POST', '/api/media/upload')
+                    xhr.send(formData)
                 })
-            } else {
-                errors.push(`${file.name}: ${result.error}`)
+
+                if (result.success && result.data) {
+                    uploadedUrls.push(result.data.url)
+                    uploadedItems.push(result.data)
+                } else {
+                    errors.push(`${file.name}: ${result.error}`)
+                }
+            } catch (error) {
+                errors.push(`${file.name}: ${error}`)
             }
         }
 
@@ -79,7 +116,13 @@ export default function MediaPicker({ value, onChange, onSelectMedia, label, nam
         }
 
         setUploading(false)
+        setUploadProgress(0)
         if (fileInputRef.current) fileInputRef.current.value = ''
+
+        // Refresh library if open
+        if (showLibrary) {
+            openLibrary()
+        }
     }
 
     const openLibrary = async () => {
@@ -257,6 +300,7 @@ export default function MediaPicker({ value, onChange, onSelectMedia, label, nam
                 onConfirmSelect={handleLibrarySelect}
                 onUploadClick={() => fileInputRef.current?.click()}
                 uploading={uploading}
+                uploadProgress={uploadProgress}
                 onDrop={(files) => handleUpload(files)}
             />
         </div>
@@ -276,11 +320,12 @@ interface MediaLibraryModalProps {
     onConfirmSelect?: () => void
     onUploadClick: () => void
     uploading: boolean
+    uploadProgress?: number
     onDrop?: (files: FileList) => void
 }
 
 // Separated Modal Component for cleaner code
-function MediaLibraryModal({ show, onClose, media, loading, onSelect, selected = [], multiple, onConfirmSelect, onUploadClick, uploading, onDrop }: MediaLibraryModalProps) {
+function MediaLibraryModal({ show, onClose, media, loading, onSelect, selected = [], multiple, onConfirmSelect, onUploadClick, uploading, uploadProgress = 0, onDrop }: MediaLibraryModalProps) {
     const [dragging, setDragging] = useState(false)
 
     if (!show) return null
@@ -359,8 +404,16 @@ function MediaLibraryModal({ show, onClose, media, loading, onSelect, selected =
                         className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
-                        {uploading ? 'Uploading...' : 'Upload New'}
+                        {uploading ? `Uploading ${uploadProgress}%` : 'Upload New'}
                     </button>
+                    {uploading && (
+                        <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-100">
+                            <div
+                                className="h-full bg-emerald-500 transition-all duration-300 ease-out"
+                                style={{ width: `${uploadProgress}%` }}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Content */}
