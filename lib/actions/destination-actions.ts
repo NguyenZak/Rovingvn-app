@@ -5,7 +5,7 @@
 
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createPublicClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { hasPermission } from "@/lib/rbac/permissions";
 
@@ -50,7 +50,8 @@ export async function getAllDestinations(params: {
             region
         } = params;
 
-        const supabase = await createClient();
+
+        const supabase = await createPublicClient();
         const from = (page - 1) * limit;
         const to = from + limit - 1;
 
@@ -100,7 +101,7 @@ export async function getAllDestinations(params: {
  */
 export async function getDestinationById(id: string) {
     try {
-        const supabase = await createClient();
+        const supabase = await createPublicClient();
         const { data, error } = await supabase
             .from('destinations')
             .select('*')
@@ -120,7 +121,7 @@ export async function getDestinationById(id: string) {
  */
 export async function getDestinationRegions() {
     try {
-        const supabase = await createClient();
+        const supabase = await createPublicClient();
         const { data, error } = await supabase
             .from('destinations')
             .select('region')
@@ -142,7 +143,7 @@ export async function getDestinationRegions() {
  */
 export async function getDestinationBySlug(slug: string) {
     try {
-        const supabase = await createClient();
+        const supabase = await createPublicClient();
         const { data, error } = await supabase
             .from('destinations')
             .select('*')

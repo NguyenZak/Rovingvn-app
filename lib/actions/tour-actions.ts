@@ -5,7 +5,7 @@
 
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createPublicClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { hasPermission } from "@/lib/rbac/permissions";
 
@@ -73,7 +73,7 @@ export async function getAllTours(params: ToursListParams = {}) {
             orderBy = 'desc'
         } = params;
 
-        const supabase = await createClient();
+        const supabase = await createPublicClient();
         const from = (page - 1) * limit;
         const to = from + limit - 1;
 
@@ -142,7 +142,7 @@ export async function getAllTours(params: ToursListParams = {}) {
  */
 export async function getTourById(id: string) {
     try {
-        const supabase = await createClient();
+        const supabase = await createPublicClient();
         const { data, error } = await supabase
             .from('tours')
             .select('*')
@@ -162,7 +162,7 @@ export async function getTourById(id: string) {
  */
 export async function getTourBySlug(slug: string) {
     try {
-        const supabase = await createClient();
+        const supabase = await createPublicClient();
         const { data, error } = await supabase
             .from('tours')
             .select('*')
@@ -196,7 +196,7 @@ export async function getTourBySlug(slug: string) {
  */
 export async function getToursByDestinationId(destinationId: string) {
     try {
-        const supabase = await createClient();
+        const supabase = await createPublicClient();
 
         // 1. Get tour IDs first (Two-step fetch to avoid schema cache issues with joins)
         const { data: tourDestinations, error: idError } = await supabase

@@ -2,6 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import nodemailer from 'nodemailer'
+import { render } from '@react-email/components'
+import ContactConfirmationEmail from '@/components/emails/ContactConfirmationEmail'
+import { sendTelegramMessage } from '@/lib/telegram'
 
 export interface GeneralInquirySubmission {
     name: string
@@ -77,6 +81,68 @@ export async function submitGeneralInquiry(data: GeneralInquirySubmission) {
         }
 
         console.log('✅ General inquiry submitted successfully:', result)
+
+        // Send emails and notifications
+        try {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.GMAIL_USER,
+                    pass: process.env.GMAIL_APP_PASSWORD,
+                },
+            })
+
+            const adminEmail = 'rovingvietnamtravel@gmail.com'
+            // Reuse Contact Confirmation Email as it's a general confirmation
+            const emailHtml = await render(ContactConfirmationEmail({ customerName: data.name }))
+
+            // 1. Send Confirmation to Customer
+            await transporter.sendMail({
+                from: `"Roving Vietnam Travel" <${process.env.GMAIL_USER}>`,
+                to: data.email,
+                replyTo: adminEmail,
+                subject: 'We received your message - Roving Vietnam Travel',
+                html: emailHtml,
+            })
+
+            // 2. Send Notification to Admin via Email
+            await transporter.sendMail({
+                from: `"New Journey Inquiry" <${process.env.GMAIL_USER}>`,
+                to: adminEmail,
+                replyTo: data.email,
+                subject: `New Journey Inquiry from ${data.name}: ${data.subject || 'No Subject'}`,
+                html: `
+                    <h1>New Start Your Journey Inquiry</h1>
+                    <p><strong>Name:</strong> ${data.name}</p>
+                    <p><strong>Email:</strong> ${data.email}</p>
+                    <p><strong>WhatsApp/Phone:</strong> ${data.phone}</p>
+                    <p><strong>People:</strong> ${data.number_of_people}</p>
+                    <p><strong>Subject:</strong> ${data.subject || 'N/A'}</p>
+                    <p><strong>Message:</strong></p>
+                    <blockquote style="background: #f9f9f9; padding: 10px; border-left: 4px solid #ccc;">
+                        ${(data.message || '').replace(/\n/g, '<br>')}
+                    </blockquote>
+                `
+            })
+            console.log('✅ Inquiry emails sent successfully')
+
+            // 3. Send Telegram Notification
+            const telegramMessage = `
+<b>🚀 New Start Your Journey Inquiry</b>
+<b>Name:</b> ${data.name}
+<b>Email:</b> ${data.email}
+<b>Phone:</b> ${data.phone}
+<b>People:</b> ${data.number_of_people}
+<b>Subject:</b> ${data.subject || 'N/A'}
+
+<b>Message:</b>
+<blockquote>${data.message || 'No message'}</blockquote>
+`
+            await sendTelegramMessage(telegramMessage)
+
+        } catch (notificationError) {
+            console.error('⚠️ Failed to send notifications:', notificationError)
+        }
 
         revalidatePath('/admin/general-inquiries')
 

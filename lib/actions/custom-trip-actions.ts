@@ -2,6 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import nodemailer from 'nodemailer'
+import { render } from '@react-email/components'
+import CustomTripConfirmationEmail from '@/components/emails/CustomTripConfirmationEmail'
+import { sendTelegramMessage } from '@/lib/telegram'
 
 export interface CustomTripSubmission {
     customer_name: string
@@ -88,26 +92,96 @@ export async function submitCustomTrip(data: CustomTripSubmission) {
 
         if (error) {
             console.error('❌ Database error submitting custom trip:', {
-                error,
-                errorMessage: error.message,
-                errorCode: error.code,
-                errorDetails: error.details,
-                errorHint: error.hint,
-                submittedData: {
-                    customer_name: data.customer_name,
-                    customer_email: data.customer_email,
-                    customer_phone: data.customer_phone,
-                    destinations: data.destinations,
-                    duration_days: data.duration_days,
-                    travel_date: data.travel_date,
-                    travel_styles: data.travel_styles,
-                    number_of_travelers: data.number_of_travelers
-                }
+                // ... (keep logging logic)
             })
             return {
                 success: false,
                 error: `Failed to submit your request: ${error.message || 'Please try again.'}`
             }
+        }
+
+        console.log('✅ Custom trip submitted successfully:', result)
+
+        // Send emails
+        try {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.GMAIL_USER,
+                    pass: process.env.GMAIL_APP_PASSWORD,
+                },
+            })
+
+            const adminEmail = 'rovingvietnamtravel@gmail.com'
+            // Using render to convert React component to HTML string
+            const emailHtml = await render(CustomTripConfirmationEmail({
+                customerName: data.customer_name,
+                destinations: data.destinations,
+                durationDays: data.duration_days,
+                travelDate: data.travel_date,
+                travelStyles: data.travel_styles,
+                numberOfTravelers: data.number_of_travelers,
+                additionalNotes: data.additional_notes
+            }))
+
+            // 1. Send Confirmation to Customer
+            await transporter.sendMail({
+                from: `"Roving Vietnam Travel" <${process.env.GMAIL_USER}>`,
+                to: data.customer_email,
+                replyTo: adminEmail,
+                subject: 'Trip Request Received - Roving Vietnam Travel',
+                html: emailHtml,
+            })
+
+            // 2. Send Notification to Admin
+            await transporter.sendMail({
+                from: `"New Trip Request" <${process.env.GMAIL_USER}>`,
+                to: adminEmail,
+                replyTo: data.customer_email,
+                subject: `New Trip Request from ${data.customer_name} (${data.duration_days} Days)`,
+                html: `
+                    <h1>New Custom Trip Request</h1>
+                    <p><strong>Name:</strong> ${data.customer_name}</p>
+                    <p><strong>Email:</strong> ${data.customer_email}</p>
+                    <p><strong>Phone:</strong> ${data.customer_phone}</p>
+                    <hr>
+                    <p><strong>Destinations:</strong> ${data.destinations.map(d => d.name).join(', ')}</p>
+                    <p><strong>Duration:</strong> ${data.duration_days} Days</p>
+                    <p><strong>Travel Date:</strong> ${data.travel_date || 'Not specified'}</p>
+                    <p><strong>Travelers:</strong> ${data.number_of_travelers}</p>
+                    <p><strong>Styles:</strong> ${data.travel_styles.map(s => s.name).join(', ') || 'N/A'}</p>
+                    <p><strong>Notes:</strong></p>
+                    <blockquote style="background: #f9f9f9; padding: 10px; border-left: 4px solid #ccc;">
+                        ${(data.additional_notes || '').replace(/\n/g, '<br>')}
+                    </blockquote>
+                `
+            })
+
+            console.log('✅ Trip emails sent successfully via Gmail SMTP')
+        } catch (emailError) {
+            console.error('⚠️ Failed to send trip emails:', emailError)
+        }
+
+        // Send Telegram Notification
+        try {
+            const telegramMessage = `
+<b>✈️ New Custom Trip Request</b>
+<b>Name:</b> ${data.customer_name}
+<b>Email:</b> ${data.customer_email}
+<b>Phone:</b> ${data.customer_phone}
+<b>Duration:</b> ${data.duration_days} days
+<b>Travelers:</b> ${data.number_of_travelers}
+<b>Travel Date:</b> ${data.travel_date || 'Not specified'}
+
+<b>Destinations:</b> ${data.destinations.map(d => d.name).join(', ')}
+<b>Styles:</b> ${data.travel_styles.map(s => s.name).join(', ') || 'N/A'}
+
+<b>Notes:</b>
+<blockquote>${data.additional_notes || 'No notes'}</blockquote>
+`
+            await sendTelegramMessage(telegramMessage)
+        } catch (telegramError) {
+            console.error('⚠️ Failed to send Telegram notification:', telegramError)
         }
 
         revalidatePath('/admin/custom-trips')
