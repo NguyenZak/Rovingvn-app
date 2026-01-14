@@ -24,13 +24,19 @@ export async function submitBooking(formData: FormData) {
 
     const data = {
         tour_id: tourId,
-        customer_name: formData.get('name') as string,
-        customer_email: formData.get('email') as string,
-        customer_phone: formData.get('phone') as string,
-        people_count: Number(formData.get('people')),
-        start_date: formData.get('date') as string,
-        message: formData.get('message') as string,
+        // Map to correct schema fields
+        customer_info: {
+            name: formData.get('name') as string,
+            email: formData.get('email') as string,
+            phone: formData.get('phone') as string,
+        },
+        travel_date: formData.get('date') as string,
+        adults: Number(formData.get('people')), // Assuming input 'people' maps to adults
+        special_requests: formData.get('message') as string,
         status: 'pending',
+        // Default values for required fields
+        total_price: 0,
+        currency: 'VND'
     }
 
     const { error } = await supabase.from('bookings').insert(data)
