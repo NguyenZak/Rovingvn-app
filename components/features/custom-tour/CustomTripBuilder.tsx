@@ -89,7 +89,7 @@ export function CustomTripBuilder({ destinations: inDestinations = [] }: CustomT
 
             setLoading(false)
             if (result.success) {
-                console.log('✅ Custom trip submitted successfully:', result.data)
+                console.log('✅ Custom trip submitted successfully')
                 setSuccess(true)
             } else {
                 console.error('❌ Failed to submit custom trip:', {

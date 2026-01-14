@@ -62,17 +62,17 @@ export async function submitBooking(formData: FormData) {
 
         // Render Email
         const emailHtml = await render(BookingConfirmationEmail({
-            customerName: data.customer_name,
+            customerName: data.customer_info.name,
             tourName: tourName,
-            date: data.start_date,
-            peopleCount: data.people_count,
-            phone: data.customer_phone
+            date: data.travel_date,
+            peopleCount: data.adults,
+            phone: data.customer_info.phone
         }))
 
         // 1. Send Confirmation to Customer
         await transporter.sendMail({
             from: `"Roving Vietnam Travel" <${process.env.GMAIL_USER}>`,
-            to: data.customer_email,
+            to: data.customer_info.email,
             replyTo: adminEmail,
             subject: `Booking Request Received: ${tourName}`,
             html: emailHtml,
@@ -82,18 +82,18 @@ export async function submitBooking(formData: FormData) {
         await transporter.sendMail({
             from: `"New Booking" <${process.env.GMAIL_USER}>`,
             to: adminEmail,
-            replyTo: data.customer_email,
-            subject: `New Booking: ${tourName} - ${data.customer_name}`,
+            replyTo: data.customer_info.email,
+            subject: `New Booking: ${tourName} - ${data.customer_info.name}`,
             html: `
                 <h1>New Tour Booking</h1>
                 <p><strong>Tour:</strong> ${tourName}</p>
-                <p><strong>Name:</strong> ${data.customer_name}</p>
-                <p><strong>Email:</strong> ${data.customer_email}</p>
-                <p><strong>Phone:</strong> ${data.customer_phone}</p>
-                <p><strong>Date:</strong> ${data.start_date}</p>
-                <p><strong>People:</strong> ${data.people_count}</p>
+                <p><strong>Name:</strong> ${data.customer_info.name}</p>
+                <p><strong>Email:</strong> ${data.customer_info.email}</p>
+                <p><strong>Phone:</strong> ${data.customer_info.phone}</p>
+                <p><strong>Date:</strong> ${data.travel_date}</p>
+                <p><strong>People:</strong> ${data.adults}</p>
                 <p><strong>Message:</strong></p>
-                <blockquote style="background: #eee; padding: 10px;">${data.message || 'No message'}</blockquote>
+                <blockquote style="background: #eee; padding: 10px;">${data.special_requests || 'No message'}</blockquote>
             `
         })
 
@@ -107,12 +107,12 @@ export async function submitBooking(formData: FormData) {
         const telegramMsg = `
 <b>🎫 New Booking Received</b>
 <b>Tour:</b> ${tourName}
-<b>Name:</b> ${data.customer_name}
-<b>Email:</b> ${data.customer_email}
-<b>Phone:</b> ${data.customer_phone}
-<b>Date:</b> ${data.start_date}
-<b>People:</b> ${data.people_count}
-<b>Message:</b> ${data.message || 'No message'}
+<b>Name:</b> ${data.customer_info.name}
+<b>Email:</b> ${data.customer_info.email}
+<b>Phone:</b> ${data.customer_info.phone}
+<b>Date:</b> ${data.travel_date}
+<b>People:</b> ${data.adults}
+<b>Message:</b> ${data.special_requests || 'No message'}
 `
         await sendTelegramMessage(telegramMsg)
         console.log('✅ Telegram sent')
