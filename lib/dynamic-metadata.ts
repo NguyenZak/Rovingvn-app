@@ -102,7 +102,7 @@ export async function generateDynamicMetadata(): Promise<Metadata> {
 
         // Verification
         verification: {
-            google: settings?.google_site_verification || "",
+            google: settings?.google_site_verification || "VPDlTwZT18QO1AOYYuR_y9C8NeEhnnG4J0fh2-3UI40",
         },
 
         // Other metadata

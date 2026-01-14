@@ -84,11 +84,9 @@ export async function submitCustomTrip(data: CustomTripSubmission) {
         }
 
         // Insert into database
-        const { data: result, error } = await supabase
+        const { error } = await supabase
             .from('custom_trips')
             .insert(insertData)
-            .select()
-            .single()
 
         if (error) {
             console.error('❌ Database error submitting custom trip:', {
@@ -100,7 +98,7 @@ export async function submitCustomTrip(data: CustomTripSubmission) {
             }
         }
 
-        console.log('✅ Custom trip submitted successfully:', result)
+        console.log('✅ Custom trip submitted successfully')
 
         // Send emails
         try {
@@ -187,8 +185,7 @@ export async function submitCustomTrip(data: CustomTripSubmission) {
         revalidatePath('/admin/custom-trips')
 
         return {
-            success: true,
-            data: result
+            success: true
         }
     } catch (error) {
         console.error('❌ Unexpected error in submitCustomTrip:', {

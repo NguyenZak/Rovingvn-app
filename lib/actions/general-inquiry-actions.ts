@@ -59,11 +59,9 @@ export async function submitGeneralInquiry(data: GeneralInquirySubmission) {
         console.log('🚀 Submitting general inquiry:', insertData)
 
         // Insert into database
-        const { data: result, error } = await supabase
+        const { error } = await supabase
             .from('general_inquiries')
             .insert(insertData)
-            .select()
-            .single()
 
         if (error) {
             console.error('❌ Database error submitting general inquiry:', {
@@ -80,7 +78,7 @@ export async function submitGeneralInquiry(data: GeneralInquirySubmission) {
             }
         }
 
-        console.log('✅ General inquiry submitted successfully:', result)
+        console.log('✅ General inquiry submitted successfully')
 
         // Send emails and notifications
         try {
@@ -147,8 +145,7 @@ export async function submitGeneralInquiry(data: GeneralInquirySubmission) {
         revalidatePath('/admin/general-inquiries')
 
         return {
-            success: true,
-            data: result
+            success: true
         }
     } catch (error) {
         console.error('❌ Unexpected error in submitGeneralInquiry:', {
