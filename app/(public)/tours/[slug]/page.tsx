@@ -4,6 +4,7 @@ import { BookingForm } from '@/components/features/bookings/BookingForm'
 import { ClientImageGrid } from '@/components/ui/ClientImageGrid'
 import { Clock, Check, X } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { getTourBySlug } from '@/lib/actions/tour-actions'
 
 // Force dynamic rendering to avoid build-time cookie access issues
 export const dynamic = 'force-dynamic'
@@ -16,17 +17,12 @@ export const dynamic = 'force-dynamic'
 // }
 
 export default async function TourPage(props: { params: Promise<{ slug: string }> }) {
+
     const params = await props.params
-    const supabase = await createClient()
 
-    const { data: tour } = await supabase
-        .from('tours')
-        .select('*')
-        .eq('slug', params.slug)
-        .eq('status', 'published')
-        .single()
+    const { data: tour } = await getTourBySlug(params.slug)
 
-    if (!tour) {
+    if (!tour || tour.status !== 'published') {
         notFound()
     }
 
@@ -48,18 +44,18 @@ export default async function TourPage(props: { params: Promise<{ slug: string }
                 <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white bg-gradient-to-t from-black/80 to-transparent">
                     <div className="container mx-auto">
                         <span className="inline-block bg-emerald-600 px-3 py-1 rounded-full text-sm font-bold mb-4">
-                            Vietnam Tour
+                            {tour.destinations?.[0]?.name || 'Vietnam Tour'}
                         </span>
                         <h1 className="text-4xl md:text-6xl font-bold mb-4">{tour.title}</h1>
                         <div className="flex flex-wrap gap-6 text-sm md:text-base opacity-90">
                             <span className="flex items-center gap-2">
                                 <Clock size={18} />
-                                {tour.duration_days > 0 && `${tour.duration_days} ${tour.duration_days === 1 ? 'day' : 'days'}`}
-                                {tour.duration_nights > 0 && ` ${tour.duration_nights} ${tour.duration_nights === 1 ? 'night' : 'nights'}`}
+                                {(tour.duration_days || 0) > 0 && `${tour.duration_days} ${(tour.duration_days || 0) === 1 ? 'day' : 'days'}`}
+                                {(tour.duration_nights || 0) > 0 && ` ${tour.duration_nights} ${(tour.duration_nights || 0) === 1 ? 'night' : 'nights'}`}
                             </span>
                             <span className="flex items-center gap-2 font-semibold text-emerald-300 text-lg">
                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(tour.price_adult || 0)}
-                                <span className="text-white font-normal text-sm">/ người lớn</span>
+                                <span className="text-white font-normal text-sm">/ person</span>
                             </span>
                         </div>
                     </div>
@@ -133,16 +129,16 @@ export default async function TourPage(props: { params: Promise<{ slug: string }
                         )}
 
                         {/* Included / Excluded */}
-                        {(tour.includes?.length > 0 || tour.excludes?.length > 0) && (
+                        {((tour.includes?.length || 0) > 0 || (tour.excludes?.length || 0) > 0) && (
                             <section className="grid md:grid-cols-2 gap-8">
-                                {tour.includes?.length > 0 && (
+                                {(tour.includes?.length || 0) > 0 && (
                                     <div className="bg-emerald-50/50 rounded-2xl p-6 border border-emerald-100">
                                         <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                                             What&apos;s Included
                                         </h3>
                                         <ul className="space-y-3">
-                                            {tour.includes.map((item: string, i: number) => (
+                                            {tour.includes?.map((item: string, i: number) => (
                                                 <li key={i} className="flex items-start gap-3 text-gray-700">
                                                     <Check size={18} className="text-emerald-600 mt-0.5 shrink-0" />
                                                     <span className="text-sm md:text-base">{item}</span>
@@ -152,14 +148,14 @@ export default async function TourPage(props: { params: Promise<{ slug: string }
                                     </div>
                                 )}
 
-                                {tour.excludes?.length > 0 && (
+                                {(tour.excludes?.length || 0) > 0 && (
                                     <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
                                         <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                             <span className="w-2 h-2 rounded-full bg-gray-400"></span>
                                             Not Included
                                         </h3>
                                         <ul className="space-y-3">
-                                            {tour.excludes.map((item: string, i: number) => (
+                                            {tour.excludes?.map((item: string, i: number) => (
                                                 <li key={i} className="flex items-start gap-3 text-gray-600">
                                                     <X size={18} className="text-gray-400 mt-0.5 shrink-0" />
                                                     <span className="text-sm md:text-base">{item}</span>

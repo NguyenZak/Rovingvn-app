@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Users, Calendar, Map, BookOpen, TrendingUp, TrendingDown } from 'lucide-react'
 import Link from 'next/link'
+import { getAllBookings } from '@/lib/actions/booking-actions'
 
 export default async function AdminDashboard() {
     const supabase = await createClient()
@@ -12,16 +13,18 @@ export default async function AdminDashboard() {
         { count: bookingsCount },
         { count: postsCount },
         { count: destinationsCount },
-        { data: recentBookings },
-        { data: recentPosts }
+        { data: recentPosts },
+        recentBookingsResult
     ] = await Promise.all([
         supabase.from('tours').select('*', { count: 'exact', head: true }),
         supabase.from('bookings').select('*', { count: 'exact', head: true }),
         supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
         supabase.from('destinations').select('*', { count: 'exact', head: true }),
-        supabase.from('bookings').select('*, tours(title)').order('created_at', { ascending: false }).limit(5),
-        supabase.from('blog_posts').select('*').order('created_at', { ascending: false }).limit(5)
+        supabase.from('blog_posts').select('*').order('created_at', { ascending: false }).limit(5),
+        getAllBookings({ limit: 5 })
     ])
+
+    const recentBookings = recentBookingsResult.data || []
 
     const stats = [
         {
@@ -108,9 +111,8 @@ export default async function AdminDashboard() {
                                     <div key={booking.id} className="p-4 hover:bg-gray-50 transition-colors">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
-                                                <p className="font-medium text-gray-900">{booking.customer_name}</p>
-                                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                                <p className="text-sm text-gray-600 mt-1">{(booking as any).tours?.title || 'Tour'}</p>
+                                                <p className="font-medium text-gray-900">{booking.customer_info?.name || 'Guest'}</p>
+                                                <p className="text-sm text-gray-600 mt-1">{booking.tour?.title || 'Tour'}</p>
                                             </div>
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
                                                 booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
