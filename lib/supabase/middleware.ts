@@ -38,8 +38,25 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    if (request.nextUrl.pathname.startsWith('/admin') && !user) {
-        return NextResponse.redirect(new URL('/login', request.url))
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+        if (!user) {
+            return NextResponse.redirect(new URL('/login', request.url))
+        }
+
+        // Check for admin/editor role
+        const { data: roles } = await supabase
+            .from('user_roles')
+            .select('roles(name)')
+            .eq('user_id', user.id)
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const hasAccess = roles?.some((r: any) =>
+            ['admin', 'editor'].includes(r.roles?.name)
+        )
+
+        if (!hasAccess) {
+            return NextResponse.redirect(new URL('/', request.url))
+        }
     }
 
     if (request.nextUrl.pathname === '/login' && user) {
