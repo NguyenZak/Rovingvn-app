@@ -1,32 +1,20 @@
 
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { getRegions } from '@/lib/actions/region-actions'
 
-const REGIONS = [
-    {
-        name: 'Northern Vietnam',
-        description: 'Hanoi, Sapa, Ha Long Bay',
-        image: 'https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=1200',
-        color: 'from-emerald-900',
-        details: 'Majestic mountains, rice terraces, and the capital\'s ancient charm.'
-    },
-    {
-        name: 'Central Vietnam',
-        description: 'Hue, Da Nang, Hoi An',
-        image: 'https://images.unsplash.com/photo-1565063670637-238478d15443?q=80&w=1200', // Hoi An
-        color: 'from-amber-900',
-        details: 'Heritage sites, stunning caves, and beautiful beaches.'
-    },
-    {
-        name: 'Southern Vietnam',
-        description: 'Ho Chi Minh City, Mekong Delta',
-        image: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=1200', // Mekong/HCMC
-        color: 'from-blue-900',
-        details: 'Vibrant city life, floating markets, and tropical islands.'
+export async function VietnamRegions() {
+    const { data: regions } = await getRegions()
+
+    // Fallback if DB is empty or error, though usually we might want to handle error better
+    // For now, if no regions, we might show nothing or empty state. 
+    // Or we could keep the hardcoded as initial seed if DB is empty? 
+    // Let's assume DB will be populated. If empty, section hides or shows empty.
+
+    if (!regions || regions.length === 0) {
+        return null // Or return standard fallback if desired
     }
-]
 
-export function VietnamRegions() {
     return (
         <section className="py-20 bg-gray-50">
             <div className="container mx-auto px-4">
@@ -36,16 +24,16 @@ export function VietnamRegions() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {REGIONS.map((region, i) => (
-                        <div key={i} className="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer">
+                    {regions.map((region, i) => (
+                        <div key={region.id} className="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500">
                             {/* Background Image */}
                             <div
                                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                                style={{ backgroundImage: `url(${region.image})` }}
+                                style={{ backgroundImage: `url(${region.image_url})` }}
                             />
 
                             {/* Gradient Overlay */}
-                            <div className={`absolute inset-0 bg-gradient-to-t ${region.color} via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity`} />
+                            <div className={`absolute inset-0 bg-gradient-to-t ${region.color || 'from-emerald-900'} via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity`} />
 
                             {/* Content */}
                             <div className="absolute inset-x-0 bottom-0 p-8 text-white">
@@ -59,7 +47,10 @@ export function VietnamRegions() {
                                     </p>
                                 </div>
 
-                                <Link href={`/tours?region=${region.name.includes('North') ? 'North' : region.name.includes('Central') ? 'Central' : 'South'}`} className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white border-b border-transparent group-hover:border-white transition-all pb-1 hover:gap-3">
+                                <Link
+                                    href={region.link || `/tours?region=${region.name}`}
+                                    className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white border-b border-transparent group-hover:border-white transition-all pb-1 hover:gap-3"
+                                >
                                     Discover Tours <ArrowRight size={16} />
                                 </Link>
                             </div>

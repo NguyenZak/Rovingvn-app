@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import {
     LayoutDashboard, Map, Calendar, FileText, Settings, LogOut,
-    Users, MapPin, BarChart3, CalendarDays, Image, Compass, MessageSquare
+    Users, MapPin, BarChart3, CalendarDays, Image, Compass, MessageSquare, Globe
 } from 'lucide-react'
 import { signout } from '@/app/login/actions'
 import { Toaster } from 'sonner'
@@ -16,6 +16,7 @@ export default function AdminLayout({
         { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { href: '/admin/tours', label: 'Tours', icon: Map },
         { href: '/admin/destinations', label: 'Destinations', icon: MapPin },
+        { href: '/admin/regions', label: 'Regions', icon: Globe },
         { href: '/admin/sliders', label: 'Sliders', icon: Image },
         { href: '/admin/media', label: 'Media', icon: Image },
         { href: '/admin/bookings', label: 'Bookings', icon: Calendar },
