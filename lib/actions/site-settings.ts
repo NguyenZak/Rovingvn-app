@@ -83,6 +83,12 @@ export interface SiteSettings {
         reviews?: boolean;
     };
 
+    // Stats
+    stat_travelers?: number;
+    stat_tours?: number;
+    stat_destinations?: number;
+    stat_years?: number;
+
     // Metadata
     created_at?: string;
     updated_at?: string;
@@ -281,5 +287,22 @@ export async function updateAnalytics(analytics: {
         facebook_pixel_id: analytics.facebookPixelId,
         google_tag_manager_id: analytics.googleTagManagerId,
         google_site_verification: analytics.googleSiteVerification,
+    });
+}
+
+/**
+ * Update stats
+ */
+export async function updateStats(stats: {
+    travelers?: number;
+    tours?: number;
+    destinations?: number;
+    years?: number;
+}) {
+    return updateSiteSettings({
+        stat_travelers: stats.travelers,
+        stat_tours: stats.tours,
+        stat_destinations: stats.destinations,
+        stat_years: stats.years,
     });
 }

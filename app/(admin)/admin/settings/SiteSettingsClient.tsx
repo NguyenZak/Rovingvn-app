@@ -77,6 +77,13 @@ export function SiteSettingsClient({ initialSettings }: SiteSettingsClientProps)
         hero_description: initialSettings?.hero_description || "",
     });
 
+    const [stats, setStats] = useState({
+        stat_travelers: initialSettings?.stat_travelers || 10000,
+        stat_tours: initialSettings?.stat_tours || 500,
+        stat_destinations: initialSettings?.stat_destinations || 30,
+        stat_years: initialSettings?.stat_years || 10,
+    });
+
     const handleSaveAll = () => {
         setError(null);
         startTransition(async () => {
@@ -88,6 +95,7 @@ export function SiteSettingsClient({ initialSettings }: SiteSettingsClientProps)
                 ...analytics,
                 ...business,
                 ...hero,
+                ...stats,
                 meta_keywords: seo.meta_keywords.split(",").map(k => k.trim()).filter(Boolean),
             });
 
@@ -590,6 +598,71 @@ export function SiteSettingsClient({ initialSettings }: SiteSettingsClientProps)
                             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                             placeholder="Vietnam is a country of breathtaking natural beauty and unique heritage..."
                         />
+                    </div>
+                </div>
+            </section>
+
+            {/* Stats Section */}
+            <section id="stats" className="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div className="p-6 border-b border-gray-100 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+                        <TrendingUp size={20} className="text-cyan-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900">Con số ấn tượng</h2>
+                        <p className="text-sm text-gray-500">Thống kê hiển thị trên trang chủ</p>
+                    </div>
+                </div>
+
+                <div className="p-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Happy Travelers
+                            </label>
+                            <input
+                                type="number"
+                                value={stats.stat_travelers}
+                                onChange={(e) => setStats({ ...stats, stat_travelers: parseInt(e.target.value) || 0 })}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Custom Tours
+                            </label>
+                            <input
+                                type="number"
+                                value={stats.stat_tours}
+                                onChange={(e) => setStats({ ...stats, stat_tours: parseInt(e.target.value) || 0 })}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Destinations
+                            </label>
+                            <input
+                                type="number"
+                                value={stats.stat_destinations}
+                                onChange={(e) => setStats({ ...stats, stat_destinations: parseInt(e.target.value) || 0 })}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Years Experience
+                            </label>
+                            <input
+                                type="number"
+                                value={stats.stat_years}
+                                onChange={(e) => setStats({ ...stats, stat_years: parseInt(e.target.value) || 0 })}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            />
+                        </div>
                     </div>
                 </div>
             </section>

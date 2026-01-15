@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import {
     LayoutDashboard, Map, Calendar, FileText, Settings, LogOut,
     Users, MapPin, BarChart3, CalendarDays, Image, Compass, MessageSquare, Globe,
-    ChevronLeft, ChevronRight
+    ChevronLeft, ChevronRight, TrendingUp
 } from 'lucide-react'
 import { signout } from '@/app/login/actions'
 import { cn } from '@/lib/utils'
@@ -26,6 +26,7 @@ const NAV_ITEMS = [
     { href: '/admin/blog', label: 'Blog', icon: FileText },
     { href: '/admin/pages', label: 'Pages', icon: FileText },
     { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+    { href: '/admin/settings#stats', label: 'Stats', icon: TrendingUp },
     { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 

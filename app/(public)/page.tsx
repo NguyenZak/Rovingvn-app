@@ -66,7 +66,12 @@ export default async function Home() {
   return (
     <>
       <Hero sliders={sliders || []} />
-      <Stats />
+      <Stats
+        travelers={settings?.stat_travelers}
+        tours={settings?.stat_tours}
+        destinations={settings?.stat_destinations}
+        years={settings?.stat_years}
+      />
 
       <VietnamRegions />
 

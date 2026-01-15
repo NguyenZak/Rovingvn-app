@@ -58,12 +58,22 @@ function Counter({ end, duration = 2000, suffix = '' }: { end: number, duration?
     )
 }
 
-export function Stats() {
+export function Stats({
+    travelers = 10000,
+    tours = 500,
+    destinations = 30,
+    years = 10
+}: {
+    travelers?: number,
+    tours?: number,
+    destinations?: number,
+    years?: number
+}) {
     const stats = [
-        { label: 'Happy Travelers', value: 10000, suffix: '+', icon: Users },
-        { label: 'Custom Tours', value: 500, suffix: '+', icon: Clock },
-        { label: 'Destinations', value: 30, suffix: '+', icon: Map },
-        { label: 'Years Experience', value: 10, suffix: '+', icon: Trophy },
+        { label: 'Happy Travelers', value: travelers, suffix: '+', icon: Users },
+        { label: 'Custom Tours', value: tours, suffix: '+', icon: Clock },
+        { label: 'Destinations', value: destinations, suffix: '+', icon: Map },
+        { label: 'Years Experience', value: years, suffix: '+', icon: Trophy },
     ]
 
     return (
