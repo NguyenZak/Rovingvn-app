@@ -12,7 +12,12 @@ interface RegionFormProps {
 }
 
 const COLOR_OPTIONS = [
-    // ... (omitted for brevity, will remain unchanged)
+    { label: 'Emerald (Green)', value: 'from-emerald-900' },
+    { label: 'Amber (Orange/Brown)', value: 'from-amber-900' },
+    { label: 'Blue (Deep Blue)', value: 'from-blue-900' },
+    { label: 'Red (Deep Red)', value: 'from-red-900' },
+    { label: 'Purple (Deep Purple)', value: 'from-purple-900' },
+    { label: 'Cyan (Teal/Cyan)', value: 'from-cyan-900' },
 ];
 
 export function RegionForm({ initialData }: RegionFormProps) {
