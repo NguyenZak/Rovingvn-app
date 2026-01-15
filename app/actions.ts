@@ -36,7 +36,7 @@ export async function submitBooking(formData: FormData) {
         status: 'pending',
         // Default values for required fields
         total_price: 0,
-        currency: 'VND'
+        currency: 'USD'
     }
 
     const { error } = await supabase.from('bookings').insert(data)

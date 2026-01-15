@@ -253,8 +253,37 @@ export default function MediaPicker({ value, onChange, onSelectMedia, label, nam
         <div className="w-full">
             {label && <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>}
 
-            {/* Preview Area or Placeholder */}
-            {value && !Array.isArray(value) ? (
+            {/* Preview Area for Multiple Images */}
+            {multiple && Array.isArray(value) && value.length > 0 && (
+                <div className={`grid grid-cols-3 sm:grid-cols-4 gap-4 mb-4 ${compact ? 'grid-cols-4' : ''}`}>
+                    {value.map((url, idx) => (
+                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group bg-gray-50">
+                            <Image
+                                src={url}
+                                alt="Selected"
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const newValue = [...value];
+                                    newValue.splice(idx, 1);
+                                    onChange(newValue);
+                                }}
+                                className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity transform scale-75 hover:scale-100"
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Single Image Preview */}
+            {!multiple && value && !Array.isArray(value) ? (
                 <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden border border-gray-200 group bg-gray-50">
                     <Image
                         src={value as string}
@@ -283,19 +312,28 @@ export default function MediaPicker({ value, onChange, onSelectMedia, label, nam
                     </div>
                 </div>
             ) : (
+                /* Placeholder / Add Button */
                 <div
-                    className={`border-2 border-dashed border-gray-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/30 transition-all cursor-pointer group flex flex-col items-center justify-center text-center ${compact ? 'p-4' : 'p-8'}`}
+                    className={`border-2 border-dashed border-gray-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/30 transition-all cursor-pointer group flex flex-col items-center justify-center text-center ${compact ? 'p-3' : 'p-8'}`}
                     onClick={openLibrary}
                 >
-                    <div className="w-12 h-12 rounded-full bg-gray-100 group-hover:bg-emerald-100 text-gray-400 group-hover:text-emerald-600 flex items-center justify-center mb-3 transition-colors">
-                        <ImageIcon size={24} />
+                    <div className={`rounded-full bg-gray-100 group-hover:bg-emerald-100 text-gray-400 group-hover:text-emerald-600 flex items-center justify-center transition-colors ${compact ? 'w-8 h-8 mb-2' : 'w-12 h-12 mb-3'}`}>
+                        {compact ? <ImageIcon size={16} /> : <ImageIcon size={24} />}
                     </div>
-                    <p className="text-sm font-medium text-gray-700 group-hover:text-emerald-700">
-                        {multiple ? 'Click to select or drop multiple images' : 'Click to select or upload image'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                        JPEG, PNG, WebP up to 5MB
-                    </p>
+                    {(!compact || (!value?.length)) && (
+                        <>
+                            <p className="text-sm font-medium text-gray-700 group-hover:text-emerald-700">
+                                {multiple && Array.isArray(value) && value.length > 0
+                                    ? 'Add more images'
+                                    : (multiple ? 'Click to select multiple images' : 'Click to select image')}
+                            </p>
+                            {!compact && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                    JPEG, PNG, WebP up to 5MB
+                                </p>
+                            )}
+                        </>
+                    )}
                 </div>
             )}
 

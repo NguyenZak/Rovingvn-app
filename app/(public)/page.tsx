@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getSiteSettings } from '@/lib/actions/site-settings'
+import { getHighlights } from '@/lib/actions/highlight-actions'
+import { getAllTours } from '@/lib/actions/tour-actions'
 import { Hero } from "@/components/features/home/Hero";
 import { Stats } from "@/components/features/home/Stats";
 import dynamic from 'next/dynamic';
@@ -24,13 +26,14 @@ export default async function Home() {
 
   // Parallel data fetching for Homepage sections
   const [
-    { data: featuredTours },
+    featuredToursResult,
     { data: destinations },
     { data: latestPosts },
     { data: sliders },
-    settings
+    settings,
+    highlights
   ] = await Promise.all([
-    supabase.from('tours').select('*').eq('status', 'published').limit(4).order('created_at', { ascending: false }),
+    getAllTours({ limit: 4, status: 'published', sortBy: 'created_at', orderBy: 'desc' }),
     // Fetch destinations
     supabase.from('destinations').select('*').eq('status', 'published').order('name', { ascending: true }),
     // Fetch blog posts with media
@@ -54,8 +57,12 @@ export default async function Home() {
       .eq('status', 'active')
       .order('display_order', { ascending: true }),
     // Fetch site settings
-    getSiteSettings()
+    getSiteSettings(),
+    // Fetch highlights
+    getHighlights()
   ])
+
+  const featuredTours = featuredToursResult.data || []
 
   console.log('Home Page Debug - Tours:', featuredTours?.length || 0)
   console.log('Home Page Debug - Destinations:', destinations?.length || 0)
@@ -117,6 +124,13 @@ export default async function Home() {
         heroTitle={settings?.hero_title}
         heroSubtitle={settings?.hero_subtitle}
         heroDescription={settings?.hero_description}
+        highlights={highlights}
+        images={{
+          image1: settings?.highlight_image_1,
+          image2: settings?.highlight_image_2,
+          image3: settings?.highlight_image_3,
+          image4: settings?.highlight_image_4,
+        }}
       />
 
       {/* Popular Destinations Section */}

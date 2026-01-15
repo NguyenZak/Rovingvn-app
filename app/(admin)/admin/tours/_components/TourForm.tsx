@@ -16,6 +16,7 @@ import type { Tour } from "@/lib/actions/tour-actions";
 import { getAllDestinations } from "@/lib/actions/destination-actions";
 import type { Destination } from "@/lib/actions/destination-actions";
 import { GenericImageUpload } from "@/app/(admin)/admin/components/GenericImageUpload";
+import MediaPicker from "@/components/ui/MediaPicker";
 
 interface TourFormProps {
     initialData?: Tour;
@@ -85,7 +86,8 @@ export function TourForm({ initialData }: TourFormProps) {
         });
     };
 
-    const handleItineraryChange = (index: number, field: string, value: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleItineraryChange = (index: number, field: string, value: any) => {
         const newItinerary = [...(formData.itinerary || [])];
         if (!newItinerary[index]) newItinerary[index] = {};
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -435,7 +437,7 @@ export function TourForm({ initialData }: TourFormProps) {
                             <h2 className="text-xl font-semibold mb-4">Pricing Configuration</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Adult Price (VND)</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Adult Price (USD)</label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                         <input
@@ -444,13 +446,13 @@ export function TourForm({ initialData }: TourFormProps) {
                                             value={formData.price_adult}
                                             onChange={(e) => handleChange('price_adult', parseInt(e.target.value))}
                                             className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                                            placeholder="1500000"
+                                            placeholder="150"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Child Price (VND)</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Child Price (USD)</label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                         <input
@@ -459,7 +461,7 @@ export function TourForm({ initialData }: TourFormProps) {
                                             value={formData.price_child}
                                             onChange={(e) => handleChange('price_child', parseInt(e.target.value))}
                                             className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                                            placeholder="1000000"
+                                            placeholder="100"
                                         />
                                     </div>
                                 </div>
@@ -516,6 +518,15 @@ export function TourForm({ initialData }: TourFormProps) {
                                                     className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                                                 />
                                             </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">Day Images</label>
+                                                <MediaPicker
+                                                    multiple
+                                                    compact
+                                                    value={day.images || []}
+                                                    onChange={(urls: string | string[]) => handleItineraryChange(index, 'images', Array.isArray(urls) ? urls : [urls])}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -534,16 +545,21 @@ export function TourForm({ initialData }: TourFormProps) {
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
                             <h2 className="text-xl font-semibold mb-4">Media</h2>
 
-                            <GenericImageUpload
+                            <MediaPicker
                                 label="Cover Image"
                                 value={formData.featured_image || ''}
-                                onChange={(url) => handleChange('featured_image', url)}
-                                recommendedSize="1200x630px"
+                                onChange={(url) => handleChange('featured_image', Array.isArray(url) ? url[0] : url)}
                             />
 
                             <div className="pt-6 border-t border-gray-100">
-                                <h3 className="text-md font-medium text-gray-700 mb-4">Gallery Images (Support coming in Phase 3)</h3>
-                                <p className="text-sm text-gray-500 italic">Gallery upload will be available when we implement the full media library.</p>
+                                <h3 className="text-md font-medium text-gray-700 mb-4">Gallery Images</h3>
+                                <MediaPicker
+                                    multiple
+                                    label="Tour Gallery"
+                                    value={formData.gallery_images || []}
+                                    onChange={(urls: string | string[]) => handleChange('gallery_images', Array.isArray(urls) ? urls : [urls])}
+                                />
+                                <p className="text-xs text-gray-500 mt-2">Select multiple images for the tour gallery.</p>
                             </div>
                         </div>
                     </div>

@@ -185,7 +185,7 @@ export default async function DestinationDetailPage({ params }: Props) {
                                                     <div className="flex flex-col">
                                                         <span className="text-xs text-gray-500 uppercase font-semibold">From</span>
                                                         <span className="text-lg font-bold text-emerald-600">
-                                                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tour.price_adult || 0)}
+                                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(tour.price_adult || 0)}
                                                         </span>
                                                     </div>
                                                     <span className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">

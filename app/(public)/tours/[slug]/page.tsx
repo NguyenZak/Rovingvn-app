@@ -1,6 +1,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { BookingForm } from '@/components/features/bookings/BookingForm'
+import { ClientImageGrid } from '@/components/ui/ClientImageGrid'
 import { Clock } from 'lucide-react'
 import { notFound } from 'next/navigation'
 
@@ -57,7 +58,7 @@ export default async function TourPage(props: { params: Promise<{ slug: string }
                                 {tour.duration_nights > 0 && ` ${tour.duration_nights} ${tour.duration_nights === 1 ? 'night' : 'nights'}`}
                             </span>
                             <span className="flex items-center gap-2 font-semibold text-emerald-300 text-lg">
-                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: tour.currency || 'VND' }).format(tour.price_adult || 0)}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: tour.currency || 'USD' }).format(tour.price_adult || 0)}
                                 <span className="text-white font-normal text-sm">/ người lớn</span>
                             </span>
                         </div>
@@ -83,19 +84,45 @@ export default async function TourPage(props: { params: Promise<{ slug: string }
                         {tour.itinerary && (
                             <section>
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Itinerary</h2>
-                                <div className="space-y-6 border-l-2 border-emerald-100 ml-3 pl-8 relative">
-                                    {/* Simplified rendering of itinerary - normally requires strict type checking for JSON */}
+                                <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                                    {/* Simplified rendering of itinerary */}
                                     {Array.isArray(tour.itinerary) ? (
                                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                        tour.itinerary.map((item: any, idx: number) => (
-                                            <div key={idx} className="relative">
-                                                <span className="absolute -left-[41px] top-0 flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 text-xs font-bold ring-4 ring-white">
-                                                    {idx + 1}
-                                                </span>
-                                                <h3 className="font-bold text-gray-900 text-lg mb-2">{item.day || `Day ${idx + 1}`}</h3>
-                                                <p className="text-gray-600">{item.description || "Detailed schedule available on request."}</p>
-                                            </div>
-                                        ))
+                                        tour.itinerary.map((item: any, idx: number) => {
+                                            const isNumberTitle = !isNaN(Number(item.day));
+                                            const displayTitle = isNumberTitle ? `Day ${item.day}` : item.day;
+
+                                            return (
+                                                <div key={idx} className="relative flex items-start group">
+                                                    <div className="absolute left-0 ml-5 -translate-x-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-emerald-500 text-emerald-600 font-bold shadow-sm z-10 group-hover:scale-110 transition-transform duration-300">
+                                                        {idx + 1}
+                                                    </div>
+                                                    <div className="ml-12">
+                                                        <h3 className="font-bold text-gray-900 text-lg mb-2 flex items-center gap-2">
+                                                            {displayTitle || `Day ${idx + 1}`}
+                                                            <span className="text-xs font-normal text-gray-400 px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200">
+                                                                Step {idx + 1}
+                                                            </span>
+                                                        </h3>
+                                                        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 hover:border-emerald-100 hover:shadow-md transition-all duration-300">
+                                                            <p className="text-gray-600 leading-relaxed whitespace-pre-line mb-4">
+                                                                {item.description || "Detailed schedule available on request."}
+                                                            </p>
+                                                            {/* Day Images */}
+                                                            {item.images && Array.isArray(item.images) && item.images.length > 0 && (
+                                                                <ClientImageGrid
+                                                                    images={item.images}
+                                                                    title={`Day ${item.day}`}
+                                                                    aspectRatio="video"
+                                                                    gridClassName="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4"
+                                                                    imageClassName="rounded-lg overflow-hidden bg-gray-200 shadow-sm hover:shadow-md transition-all duration-300"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
                                     ) : (
                                         <p className="text-gray-500 italic">Itinerary details available upon request.</p>
                                     )}
@@ -107,14 +134,13 @@ export default async function TourPage(props: { params: Promise<{ slug: string }
                         {images.length > 1 && (
                             <section>
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Gallery</h2>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {images.slice(1).map((imgUrl: string, i: number) => (
-                                        <div key={i} className="aspect-video rounded-xl overflow-hidden bg-gray-100">
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={imgUrl} alt={`Gallery ${i}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-                                        </div>
-                                    ))}
-                                </div>
+                                <ClientImageGrid
+                                    images={images.slice(1)}
+                                    title={tour.title}
+                                    aspectRatio="4/3"
+                                    gridClassName="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+                                    imageClassName="rounded-2xl overflow-hidden bg-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+                                />
                             </section>
                         )}
 

@@ -105,9 +105,9 @@ export function ToursClient({
 
     const formatPrice = (price?: number) => {
         if (!price) return 'N/A';
-        return new Intl.NumberFormat('vi-VN', {
+        return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'VND'
+            currency: 'USD'
         }).format(price);
     };
 

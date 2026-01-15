@@ -28,7 +28,7 @@ export default function BookingForm({ initialData, isEdit = false }: BookingForm
         children: initialData?.children || 0,
         infants: initialData?.infants || 0,
         total_price: initialData?.total_price || 0,
-        currency: initialData?.currency || "VND",
+        currency: initialData?.currency || "USD",
         payment_status: initialData?.payment_status || "pending",
         payment_method: initialData?.payment_method || "bank_transfer",
         status: initialData?.status || "pending",
@@ -249,7 +249,7 @@ export default function BookingForm({ initialData, isEdit = false }: BookingForm
                                     ) : (
                                         tours.map(tour => (
                                             <option key={tour.id} value={tour.id}>
-                                                {tour.title} ({new Intl.NumberFormat('vi-VN', { style: 'currency', currency: tour.currency || 'VND' }).format(tour.price_adult || 0)})
+                                                {tour.title} ({new Intl.NumberFormat('en-US', { style: 'currency', currency: tour.currency || 'USD' }).format(tour.price_adult || 0)})
                                             </option>
                                         ))
                                     )}
@@ -393,8 +393,8 @@ export default function BookingForm({ initialData, isEdit = false }: BookingForm
                                         onChange={(e) => handleChange('currency', e.target.value)}
                                         className="w-24 px-2 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                                     >
-                                        <option value="VND">VND</option>
                                         <option value="USD">USD</option>
+                                        <option value="VND">VND</option>
                                     </select>
                                 </div>
                                 <button

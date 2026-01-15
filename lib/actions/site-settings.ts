@@ -89,6 +89,12 @@ export interface SiteSettings {
     stat_destinations?: number;
     stat_years?: number;
 
+    // Highlight Images
+    highlight_image_1?: string;
+    highlight_image_2?: string;
+    highlight_image_3?: string;
+    highlight_image_4?: string;
+
     // Metadata
     created_at?: string;
     updated_at?: string;

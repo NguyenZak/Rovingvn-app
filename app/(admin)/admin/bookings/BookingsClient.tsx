@@ -240,7 +240,7 @@ export function BookingsClient({
                                     </td>
                                     <td className="px-6 py-4 space-y-2">
                                         <div className="text-sm font-bold text-gray-900">
-                                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: booking.currency || 'VND' }).format(booking.total_price)}
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: booking.currency || 'USD' }).format(booking.total_price)}
                                         </div>
                                         <div className="flex gap-2">
                                             {getStatusBadge(booking.status)}

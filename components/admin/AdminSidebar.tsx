@@ -25,6 +25,7 @@ const NAV_ITEMS = [
     { href: '/admin/customers', label: 'Customers', icon: Users },
     { href: '/admin/blog', label: 'Blog', icon: FileText },
     { href: '/admin/pages', label: 'Pages', icon: FileText },
+    { href: '/admin/highlights', label: 'Highlights', icon: Compass },
     { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
     { href: '/admin/settings#stats', label: 'Stats', icon: TrendingUp },
     { href: '/admin/settings', label: 'Settings', icon: Settings },
