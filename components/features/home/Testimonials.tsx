@@ -1,34 +1,14 @@
-
-'use client'
-
 import { Star, Quote } from 'lucide-react'
 import Image from 'next/image'
+import { getPublishedTestimonials } from '@/lib/actions/testimonial-actions'
 
-const REVIEWS = [
-    {
-        name: 'Sarah Johnson',
-        country: 'USA',
-        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200',
-        text: 'The best travel experience of my life! The guides were incredibly knowledgeable and the itinerary was perfect. Vietnam is beautiful.',
-        rating: 5
-    },
-    {
-        name: 'Michael Chen',
-        country: 'Singapore',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200',
-        text: 'Very professional service. They handled our complex family group booking with ease. Highly recommended for anyone visiting Vietnam.',
-        rating: 5
-    },
-    {
-        name: 'Emma Watson',
-        country: 'UK',
-        image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200',
-        text: 'We found hidden gems that weren\'t in any guidebook. The local homestay experience in Sapa was the highlight of our trip.',
-        rating: 5
+export async function Testimonials() {
+    const { data: testimonials = [] } = await getPublishedTestimonials();
+
+    if (!testimonials || testimonials.length === 0) {
+        return null; // Don't render if no testimonials
     }
-]
 
-export function Testimonials() {
     return (
         <section className="py-20 md:py-24 bg-emerald-900 text-white relative overflow-hidden">
             {/* Decorative Background */}
@@ -41,21 +21,21 @@ export function Testimonials() {
                     <p className="text-emerald-100/80 text-lg">Don&apos;t just take our word for it. Read reviews from our happy customers.</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {REVIEWS.map((review, i) => (
-                        <div key={i} className="bg-white/10 backdrop-blur-sm border border-white/10 p-8 rounded-2xl hover:bg-white/15 transition-colors">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {testimonials.map((review) => (
+                        <div key={review.id} className="bg-white/10 backdrop-blur-sm border border-white/10 p-8 rounded-2xl hover:bg-white/15 transition-colors">
                             <div className="flex gap-1 mb-6 text-yellow-400">
                                 {[...Array(review.rating)].map((_, i) => <Star key={i} size={18} fill="currentColor" />)}
                             </div>
 
                             <Quote className="text-emerald-400 mb-4 opacity-50" size={32} />
 
-                            <p className="text-lg leading-relaxed mb-6 italic text-emerald-50">&quot;{review.text}&quot;</p>
+                            <p className="text-lg leading-relaxed mb-6 italic text-emerald-50">&quot;{review.content}&quot;</p>
 
                             <div className="flex items-center gap-4">
-                                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-emerald-400">
+                                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-emerald-400 bg-emerald-950">
                                     <Image
-                                        src={review.image}
+                                        src={review.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.name)}&background=random`}
                                         alt={review.name}
                                         fill
                                         className="object-cover"
@@ -63,7 +43,7 @@ export function Testimonials() {
                                 </div>
                                 <div>
                                     <h4 className="font-bold">{review.name}</h4>
-                                    <p className="text-sm text-emerald-200">{review.country}</p>
+                                    <p className="text-sm text-emerald-200">{review.role}</p>
                                 </div>
                             </div>
                         </div>

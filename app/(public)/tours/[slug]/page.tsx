@@ -2,7 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { BookingForm } from '@/components/features/bookings/BookingForm'
 import { ClientImageGrid } from '@/components/ui/ClientImageGrid'
-import { Clock } from 'lucide-react'
+import { Clock, Check, X } from 'lucide-react'
 import { notFound } from 'next/navigation'
 
 // Force dynamic rendering to avoid build-time cookie access issues
@@ -58,7 +58,7 @@ export default async function TourPage(props: { params: Promise<{ slug: string }
                                 {tour.duration_nights > 0 && ` ${tour.duration_nights} ${tour.duration_nights === 1 ? 'night' : 'nights'}`}
                             </span>
                             <span className="flex items-center gap-2 font-semibold text-emerald-300 text-lg">
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: tour.currency || 'USD' }).format(tour.price_adult || 0)}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(tour.price_adult || 0)}
                                 <span className="text-white font-normal text-sm">/ người lớn</span>
                             </span>
                         </div>
@@ -79,6 +79,8 @@ export default async function TourPage(props: { params: Promise<{ slug: string }
                                 <p className="whitespace-pre-line">{tour.description}</p>
                             </div>
                         </section>
+
+
 
                         {/* Itinerary (Handling JSONB) */}
                         {tour.itinerary && (
@@ -127,6 +129,45 @@ export default async function TourPage(props: { params: Promise<{ slug: string }
                                         <p className="text-gray-500 italic">Itinerary details available upon request.</p>
                                     )}
                                 </div>
+                            </section>
+                        )}
+
+                        {/* Included / Excluded */}
+                        {(tour.includes?.length > 0 || tour.excludes?.length > 0) && (
+                            <section className="grid md:grid-cols-2 gap-8">
+                                {tour.includes?.length > 0 && (
+                                    <div className="bg-emerald-50/50 rounded-2xl p-6 border border-emerald-100">
+                                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                            What&apos;s Included
+                                        </h3>
+                                        <ul className="space-y-3">
+                                            {tour.includes.map((item: string, i: number) => (
+                                                <li key={i} className="flex items-start gap-3 text-gray-700">
+                                                    <Check size={18} className="text-emerald-600 mt-0.5 shrink-0" />
+                                                    <span className="text-sm md:text-base">{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {tour.excludes?.length > 0 && (
+                                    <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                                            Not Included
+                                        </h3>
+                                        <ul className="space-y-3">
+                                            {tour.excludes.map((item: string, i: number) => (
+                                                <li key={i} className="flex items-start gap-3 text-gray-600">
+                                                    <X size={18} className="text-gray-400 mt-0.5 shrink-0" />
+                                                    <span className="text-sm md:text-base">{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
                             </section>
                         )}
 
