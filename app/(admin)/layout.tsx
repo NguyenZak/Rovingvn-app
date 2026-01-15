@@ -1,66 +1,16 @@
 
-import Link from 'next/link'
-import {
-    LayoutDashboard, Map, Calendar, FileText, Settings, LogOut,
-    Users, MapPin, BarChart3, CalendarDays, Image, Compass, MessageSquare, Globe
-} from 'lucide-react'
-import { signout } from '@/app/login/actions'
 import { Toaster } from 'sonner'
+import { AdminSidebar } from '@/components/admin/AdminSidebar'
 
 export default function AdminLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
-    const NAV_ITEMS = [
-        { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { href: '/admin/tours', label: 'Tours', icon: Map },
-        { href: '/admin/destinations', label: 'Destinations', icon: MapPin },
-        { href: '/admin/regions', label: 'Regions', icon: Globe },
-        { href: '/admin/sliders', label: 'Sliders', icon: Image },
-        { href: '/admin/media', label: 'Media', icon: Image },
-        { href: '/admin/bookings', label: 'Bookings', icon: Calendar },
-        { href: '/admin/bookings/calendar', label: 'Calendar View', icon: CalendarDays },
-        { href: '/admin/custom-trips', label: 'Custom Trips', icon: Compass },
-        { href: '/admin/general-inquiries', label: 'General Inquiries', icon: MessageSquare },
-        { href: '/admin/customers', label: 'Customers', icon: Users },
-        { href: '/admin/blog', label: 'Blog', icon: FileText },
-        { href: '/admin/pages', label: 'Pages', icon: FileText },
-        { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-        { href: '/admin/settings', label: 'Settings', icon: Settings },
-    ]
-
     return (
         <div className="flex h-screen bg-gray-100">
             <Toaster richColors position="top-right" />
-            {/* Sidebar */}
-            <aside className="w-64 bg-slate-900 text-white flex flex-col">
-                <div className="p-6 border-b border-gray-800">
-                    <h1 className="text-xl font-bold tracking-tight">Roving Admin</h1>
-                </div>
-
-                <nav className="flex-1 p-4 space-y-1">
-                    {NAV_ITEMS.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
-                        >
-                            <item.icon size={20} />
-                            <span className="font-medium">{item.label}</span>
-                        </Link>
-                    ))}
-                </nav>
-
-                <div className="p-4 border-t border-gray-800">
-                    <form action={signout}>
-                        <button type="submit" className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-gray-800 hover:text-red-300 rounded-lg transition-colors w-full">
-                            <LogOut size={20} />
-                            <span className="font-medium">Sign Out</span>
-                        </button>
-                    </form>
-                </div>
-            </aside>
+            <AdminSidebar />
 
             {/* Main Content */}
             <main className="flex-1 overflow-auto">
