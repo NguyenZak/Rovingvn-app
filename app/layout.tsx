@@ -43,9 +43,7 @@ export default function RootLayout({
             __html: JSON.stringify(websiteSchema),
           }}
         />
-        {/* Preconnect to external domains for better performance */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Preconnect to external domains removed as next/font handles optimization */}
       </head>
       <body
         className={`${beVietnamPro.variable} antialiased`}

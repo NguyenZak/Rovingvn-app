@@ -2,19 +2,20 @@ import { createClient } from '@/lib/supabase/server'
 import { getSiteSettings } from '@/lib/actions/site-settings'
 import { Hero } from "@/components/features/home/Hero";
 import { Stats } from "@/components/features/home/Stats";
-
-import { HowItWorks } from "@/components/features/home/HowItWorks";
-import { VietnamRegions } from "@/components/features/home/VietnamRegions";
-import { CulturalHighlights } from "@/components/features/home/CulturalHighlights";
-import { RecommendedProvinces } from "@/components/features/home/RecommendedProvinces";
-import { TravelGuide } from "@/components/features/home/TravelGuide";
-import { DesignTripCTA } from "@/components/features/home/DesignTripCTA";
-import { Testimonials } from "@/components/features/home/Testimonials";
-import { Newsletter } from "@/components/features/home/Newsletter";
-import { HomeContactForm } from "@/components/features/home/HomeContactForm";
-import { TourCard } from "@/components/features/tours/TourCard";
+import dynamic from 'next/dynamic';
 import Link from "next/link";
 import { ArrowRight, MapPin, Calendar } from "lucide-react";
+
+const HowItWorks = dynamic(() => import("@/components/features/home/HowItWorks").then(mod => mod.HowItWorks));
+const VietnamRegions = dynamic(() => import("@/components/features/home/VietnamRegions").then(mod => mod.VietnamRegions));
+const CulturalHighlights = dynamic(() => import("@/components/features/home/CulturalHighlights").then(mod => mod.CulturalHighlights));
+const RecommendedProvinces = dynamic(() => import("@/components/features/home/RecommendedProvinces").then(mod => mod.RecommendedProvinces));
+const TravelGuide = dynamic(() => import("@/components/features/home/TravelGuide").then(mod => mod.TravelGuide));
+const DesignTripCTA = dynamic(() => import("@/components/features/home/DesignTripCTA").then(mod => mod.DesignTripCTA));
+const Testimonials = dynamic(() => import("@/components/features/home/Testimonials").then(mod => mod.Testimonials));
+const Newsletter = dynamic(() => import("@/components/features/home/Newsletter").then(mod => mod.Newsletter));
+const HomeContactForm = dynamic(() => import("@/components/features/home/HomeContactForm").then(mod => mod.HomeContactForm));
+const TourCard = dynamic(() => import("@/components/features/tours/TourCard").then(mod => mod.TourCard));
 
 export const revalidate = 0 // Dynamic data for development
 
