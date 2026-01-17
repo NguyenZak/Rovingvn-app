@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getSiteSettings } from '@/lib/actions/site-settings'
 import { getHighlights } from '@/lib/actions/highlight-actions'
 import { getAllTours } from '@/lib/actions/tour-actions'
+import { getRegions } from '@/lib/actions/region-actions'
+import { getFeaturedDestinations } from '@/lib/actions/destination-actions'
 import { Hero } from "@/components/features/home/Hero";
 import { Stats } from "@/components/features/home/Stats";
 import dynamic from 'next/dynamic';
@@ -27,15 +29,16 @@ export default async function Home() {
   // Parallel data fetching for Homepage sections
   const [
     featuredToursResult,
-    { data: destinations },
+    featuredDestinationsResult,
     { data: latestPosts },
     { data: sliders },
     settings,
-    highlights
+    highlights,
+    regionsResult
   ] = await Promise.all([
     getAllTours({ limit: 4, status: 'published', sortBy: 'created_at', orderBy: 'desc' }),
-    // Fetch destinations
-    supabase.from('destinations').select('*').eq('status', 'published').order('name', { ascending: true }),
+    // Fetch featured destinations only
+    getFeaturedDestinations(),
     // Fetch blog posts with media
     supabase
       .from('blog_posts')
@@ -59,13 +62,17 @@ export default async function Home() {
     // Fetch site settings
     getSiteSettings(),
     // Fetch highlights
-    getHighlights()
+    getHighlights(),
+    // Fetch regions
+    getRegions()
   ])
 
   const featuredTours = featuredToursResult.data || []
+  const regions = regionsResult.data || []
+  const destinations = featuredDestinationsResult.data || []
 
   console.log('Home Page Debug - Tours:', featuredTours?.length || 0)
-  console.log('Home Page Debug - Destinations:', destinations?.length || 0)
+  console.log('Home Page Debug - Featured Destinations:', destinations?.length || 0)
   if (destinations && destinations.length > 0) {
     console.log('First Destination Status:', destinations[0].status)
   }
@@ -80,7 +87,7 @@ export default async function Home() {
         years={settings?.stat_years}
       />
 
-      <VietnamRegions />
+      <VietnamRegions regions={regions} />
 
       <RecommendedProvinces destinations={destinations || []} />
 

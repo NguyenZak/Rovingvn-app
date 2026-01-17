@@ -8,14 +8,16 @@ import { upsertDestination } from '@/app/(admin)/admin/actions'
 import MediaPicker from '@/components/ui/MediaPicker'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import type { Region } from '@/lib/actions/region-actions'
 
 interface DestinationFormProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     destination?: any
     isNew: boolean
+    regions: Region[]
 }
 
-export function DestinationForm({ destination, isNew }: DestinationFormProps) {
+export function DestinationForm({ destination, isNew, regions }: DestinationFormProps) {
     const router = useRouter()
     const [imageUrl, setImageUrl] = useState(destination?.image_url || '')
     const [galleryImages] = useState(destination?.gallery_images || '[]')
@@ -90,12 +92,15 @@ export function DestinationForm({ destination, isNew }: DestinationFormProps) {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Region</label>
                         <select
                             name="region"
-                            defaultValue={destination?.region || 'North'}
+                            defaultValue={destination?.region || ''}
                             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-700"
                         >
-                            <option value="North">North Vietnam</option>
-                            <option value="Central">Central Vietnam</option>
-                            <option value="South">South Vietnam</option>
+                            <option value="">Select a region</option>
+                            {regions.map((region) => (
+                                <option key={region.id} value={region.name}>
+                                    {region.name}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
@@ -269,15 +274,27 @@ export function DestinationForm({ destination, isNew }: DestinationFormProps) {
 
             {/* Form Actions */}
             <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-6">
                     <select
                         name="status"
                         defaultValue={destination?.status || 'draft'}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-700"
+                        className="px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-gray-700"
                     >
                         <option value="draft">Draft (not visible to public)</option>
                         <option value="published">Published (visible to public)</option>
                     </select>
+
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                        <input
+                            type="checkbox"
+                            name="show_in_featured"
+                            defaultChecked={destination?.show_in_featured || false}
+                            className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 focus:ring-2 cursor-pointer"
+                        />
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors">
+                            Show in "Destinations Not To Miss"
+                        </span>
+                    </label>
                 </div>
 
                 <div className="flex items-center gap-3">

@@ -27,6 +27,7 @@ export function RegionForm({ initialData }: RegionFormProps) {
 
     const [formData, setFormData] = useState<RegionInput>({
         name: initialData?.name || '',
+        slug: initialData?.slug || '',
         description: initialData?.description || '',
         details: initialData?.details || '',
         image_url: initialData?.image_url || '',

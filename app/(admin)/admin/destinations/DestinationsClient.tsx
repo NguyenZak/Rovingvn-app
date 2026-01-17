@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { deleteDestination } from "@/lib/actions/destination-actions";
 import type { Destination } from "@/lib/actions/destination-actions";
+import type { Region } from "@/lib/actions/region-actions";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -20,13 +21,15 @@ interface DestinationsClientProps {
     initialSearch: string;
     initialStatus: string;
     initialRegion: string;
+    regions: Region[];
 }
 
 export function DestinationsClient({
     initialDestinations,
     initialSearch,
     initialStatus,
-    initialRegion
+    initialRegion,
+    regions
 }: DestinationsClientProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -110,17 +113,21 @@ export function DestinationsClient({
                         />
                     </div>
 
+                    {/* Region Filter - Dynamic */}
                     <select
                         value={regionFilter}
                         onChange={(e) => { setRegionFilter(e.target.value); updateParams('region', e.target.value); }}
                         className="px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                     >
                         <option value="">All Regions</option>
-                        <option value="North">North</option>
-                        <option value="Central">Central</option>
-                        <option value="South">South</option>
+                        {regions.map((region) => (
+                            <option key={region.id} value={region.name}>
+                                {region.name}
+                            </option>
+                        ))}
                     </select>
 
+                    {/* Status Filter */}
                     <select
                         value={statusFilter}
                         onChange={(e) => { setStatusFilter(e.target.value); updateParams('status', e.target.value); }}
@@ -148,6 +155,14 @@ export function DestinationsClient({
                             <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-semibold shadow-sm">
                                 {dest.region}
                             </div>
+                            {dest.show_in_featured && (
+                                <div className="absolute top-2 left-2 bg-emerald-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-sm flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                    </svg>
+                                    Featured
+                                </div>
+                            )}
                         </div>
 
                         <div className="p-4">

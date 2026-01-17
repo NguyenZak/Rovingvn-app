@@ -6,6 +6,7 @@ import { getAllDestinations } from "@/lib/actions/destination-actions";
 import { DestinationsClient } from "./DestinationsClient";
 import { hasPermission } from "@/lib/rbac/permissions";
 import { redirect } from "next/navigation";
+import { getRegions } from "@/lib/actions/region-actions";
 
 export const metadata = {
     title: "Destinations Management | Admin",
@@ -31,6 +32,7 @@ export default async function DestinationsPage({
     const status = statusParam || '';
     const region = regionParam || '';
 
+    // Fetch destinations
     const result = await getAllDestinations({
         page,
         search,
@@ -41,6 +43,9 @@ export default async function DestinationsPage({
 
     const destinations = result.success && result.data ? result.data : [];
 
+    // Fetch regions for filter dropdown
+    const regionsResult = await getRegions();
+    const regions = regionsResult.success ? regionsResult.data : [];
 
     return (
         <DestinationsClient
@@ -48,6 +53,7 @@ export default async function DestinationsPage({
             initialSearch={search}
             initialStatus={status}
             initialRegion={region}
+            regions={regions}
         />
     );
 }

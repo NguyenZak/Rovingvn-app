@@ -1,18 +1,16 @@
+'use client'
 
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { getRegions } from '@/lib/actions/region-actions'
+import type { Region as RegionType } from '@/lib/actions/region-actions'
 
-export async function VietnamRegions() {
-    const { data: regions } = await getRegions()
+interface VietnamRegionsProps {
+    regions: RegionType[]
+}
 
-    // Fallback if DB is empty or error, though usually we might want to handle error better
-    // For now, if no regions, we might show nothing or empty state. 
-    // Or we could keep the hardcoded as initial seed if DB is empty? 
-    // Let's assume DB will be populated. If empty, section hides or shows empty.
-
+export function VietnamRegions({ regions }: VietnamRegionsProps) {
     if (!regions || regions.length === 0) {
-        return null // Or return standard fallback if desired
+        return null
     }
 
     return (
@@ -24,12 +22,16 @@ export async function VietnamRegions() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {regions.map((region, i) => (
-                        <div key={region.id} className="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500">
+                    {regions.map((region) => (
+                        <Link
+                            key={region.id}
+                            href={`/regions/${region.slug}`}
+                            className="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500"
+                        >
                             {/* Background Image */}
                             <div
                                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                                style={{ backgroundImage: `url(${region.image_url})` }}
+                                style={{ backgroundImage: `url(${region.image_url || ''})` }}
                             />
 
                             {/* Gradient Overlay */}
@@ -38,23 +40,22 @@ export async function VietnamRegions() {
                             {/* Content */}
                             <div className="absolute inset-x-0 bottom-0 p-8 text-white">
                                 <h3 className="text-2xl font-bold mb-2">{region.name}</h3>
-                                <p className="text-white/90 font-medium mb-4">{region.description}</p>
+                                <p className="text-white/90 font-medium mb-4">{region.description || ''}</p>
 
                                 {/* Expanded Content on Hover */}
-                                <div className="h-0 overflow-hidden group-hover:h-auto group-hover:mb-4 transition-all duration-300">
-                                    <p className="text-sm text-gray-200 leading-relaxed">
-                                        {region.details}
-                                    </p>
-                                </div>
+                                {region.details && (
+                                    <div className="h-0 overflow-hidden group-hover:h-auto group-hover:mb-4 transition-all duration-300">
+                                        <p className="text-sm text-gray-200 leading-relaxed">
+                                            {region.details}
+                                        </p>
+                                    </div>
+                                )}
 
-                                <Link
-                                    href={region.link || `/tours?region=${region.name}`}
-                                    className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white border-b border-transparent group-hover:border-white transition-all pb-1 hover:gap-3"
-                                >
-                                    Discover Tours <ArrowRight size={16} />
-                                </Link>
+                                <div className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white border-b border-transparent group-hover:border-white transition-all pb-1 group-hover:gap-3">
+                                    View Destinations <ArrowRight size={16} />
+                                </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

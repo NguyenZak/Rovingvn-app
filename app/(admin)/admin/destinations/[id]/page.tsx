@@ -4,11 +4,16 @@ import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { DestinationForm } from '../_components/DestinationForm'
+import { getRegions } from '@/lib/actions/region-actions'
 
 export default async function DestinationFormPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
     const isNew = id === 'new'
     let destination = null
+
+    // Fetch regions for the form
+    const regionsResult = await getRegions()
+    const regions = regionsResult.data || []
 
     if (!isNew) {
         const supabase = await createClient()
@@ -38,7 +43,7 @@ export default async function DestinationFormPage({ params }: { params: Promise<
                 </div>
             </div>
 
-            <DestinationForm destination={destination} isNew={isNew} />
+            <DestinationForm destination={destination} isNew={isNew} regions={regions} />
         </div>
     )
 }

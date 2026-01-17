@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 export interface Region {
     id: string
     name: string
+    slug: string
     description: string | null
     details: string | null
     image_url: string | null
@@ -56,6 +57,26 @@ export async function getRegion(id: string) {
 
     if (error) {
         console.error('Error fetching region:', error)
+        return { success: false, error: error.message }
+    }
+
+    return { success: true, data: data as Region }
+}
+
+/**
+ * Get single region by slug
+ */
+export async function getRegionBySlug(slug: string) {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('regions')
+        .select('*')
+        .eq('slug', slug)
+        .single()
+
+    if (error) {
+        console.error('Error fetching region by slug:', error)
         return { success: false, error: error.message }
     }
 

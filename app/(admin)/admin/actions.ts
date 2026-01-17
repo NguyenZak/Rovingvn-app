@@ -167,6 +167,7 @@ export async function upsertDestination(formData: FormData) {
         seo_title: formData.get('seo_title') || null,
         seo_description: formData.get('seo_description') || null,
         status: formData.get('status') || 'draft',
+        show_in_featured: formData.get('show_in_featured') === 'on',
     }
 
     let error;

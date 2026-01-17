@@ -29,6 +29,7 @@ export interface Destination {
     meta_description?: string;
     status: 'draft' | 'published' | 'archived';
     featured: boolean;
+    show_in_featured?: boolean;
 }
 
 /**
@@ -230,5 +231,32 @@ export async function deleteDestination(id: string) {
         return { success: true };
     } catch {
         return { success: false, error: 'Failed to delete destination' };
+    }
+}
+
+/**
+ * Get featured destinations for "Destinations Not To Miss" section
+ */
+export async function getFeaturedDestinations() {
+    try {
+        const supabase = await createPublicClient();
+        const { data, error } = await supabase
+            .from('destinations')
+            .select('*')
+            .eq('status', 'published')
+            .eq('show_in_featured', true)
+            .order('name', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching featured destinations:', error);
+            return { success: false, error: 'Failed to fetch featured destinations' };
+        }
+
+        return {
+            success: true,
+            data: data as Destination[] || []
+        };
+    } catch {
+        return { success: false, error: 'Failed to fetch featured destinations' };
     }
 }
