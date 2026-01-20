@@ -3,7 +3,7 @@ import { getSiteSettings } from '@/lib/actions/site-settings'
 import { getHighlights } from '@/lib/actions/highlight-actions'
 import { getAllTours } from '@/lib/actions/tour-actions'
 import { getRegions } from '@/lib/actions/region-actions'
-import { getFeaturedDestinations } from '@/lib/actions/destination-actions'
+import { getFeaturedDestinations, getAllDestinations } from '@/lib/actions/destination-actions'
 import { Hero } from "@/components/features/home/Hero";
 import { Stats } from "@/components/features/home/Stats";
 import dynamic from 'next/dynamic';
@@ -29,6 +29,7 @@ export default async function Home() {
   // Parallel data fetching for Homepage sections
   const [
     featuredToursResult,
+    allDestinationsResult,
     featuredDestinationsResult,
     { data: latestPosts },
     { data: sliders },
@@ -37,6 +38,8 @@ export default async function Home() {
     regionsResult
   ] = await Promise.all([
     getAllTours({ limit: 4, status: 'published', sortBy: 'created_at', orderBy: 'desc' }),
+    // Fetch all destinations for search dropdown
+    getAllDestinations({ status: 'published', limit: 100 }),
     // Fetch featured destinations only
     getFeaturedDestinations(),
     // Fetch blog posts with media
@@ -68,18 +71,19 @@ export default async function Home() {
   ])
 
   const featuredTours = featuredToursResult.data || []
+  const allDestinations = allDestinationsResult.data || []
   const regions = regionsResult.data || []
-  const destinations = featuredDestinationsResult.data || []
+  const featuredDestinations = featuredDestinationsResult.data || []
 
   console.log('Home Page Debug - Tours:', featuredTours?.length || 0)
-  console.log('Home Page Debug - Featured Destinations:', destinations?.length || 0)
-  if (destinations && destinations.length > 0) {
-    console.log('First Destination Status:', destinations[0].status)
+  console.log('Home Page Debug - Featured Destinations:', featuredDestinations?.length || 0)
+  if (featuredDestinations && featuredDestinations.length > 0) {
+    console.log('First Destination Status:', featuredDestinations[0].status)
   }
 
   return (
     <>
-      <Hero sliders={sliders || []} />
+      <Hero sliders={sliders || []} destinations={allDestinations} />
       <Stats
         travelers={settings?.stat_travelers}
         tours={settings?.stat_tours}
@@ -89,7 +93,7 @@ export default async function Home() {
 
       <VietnamRegions regions={regions} />
 
-      <RecommendedProvinces destinations={destinations || []} />
+      <RecommendedProvinces destinations={featuredDestinations || []} />
 
       <DesignTripCTA />
 
@@ -149,7 +153,7 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {destinations?.map((dest) => (
+            {featuredDestinations?.map((dest) => (
               <Link key={dest.id} href={`/tours?destination=${dest.slug}`} className="group relative rounded-2xl overflow-hidden aspect-[3/4] block shadow-md hover:shadow-xl transition-all">
                 <div
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"

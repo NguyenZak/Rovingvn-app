@@ -16,11 +16,14 @@ interface SliderWithImage extends Slider {
 
 interface HeroProps {
     sliders?: SliderWithImage[];
+    destinations?: { id: string; name: string; slug: string }[];
 }
 
-export function Hero({ sliders = [] }: HeroProps) {
+export function Hero({ sliders = [], destinations = [] }: HeroProps) {
     const [currentSlide, setCurrentSlide] = useState(0)
     const [query, setQuery] = useState('')
+    const [selectedDestination, setSelectedDestination] = useState('')
+    const [selectedDuration, setSelectedDuration] = useState('')
     const router = useRouter()
 
     // Default fallback slides if no dynamic sliders are provided
@@ -48,8 +51,17 @@ export function Hero({ sliders = [] }: HeroProps) {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
-        if (query.trim()) {
-            router.push(`/tours?search=${encodeURIComponent(query)}`)
+        const params = new URLSearchParams()
+
+        if (query.trim()) params.set('q', query)
+        if (selectedDestination) params.set('destination', selectedDestination)
+        if (selectedDuration) params.set('duration', selectedDuration)
+
+        const queryString = params.toString()
+        if (queryString) {
+            router.push(`/tours?${queryString}`)
+        } else {
+            router.push('/tours')
         }
     }
 
@@ -110,7 +122,7 @@ export function Hero({ sliders = [] }: HeroProps) {
             )}
 
             <div className="relative z-10 container mx-auto px-4 text-center text-white">
-                <div className="transition-all duration-500 transform translate-y-0 opacity-100">
+                <div className="transition-all duration-500 transform translate-y-0 opacity-100 mb-10">
                     <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight drop-shadow-lg">
                         {activeSlides[currentSlide].title.includes('Vietnam') ? (
                             <>Discover the Soul of <span className="text-emerald-400">Vietnam</span></>
@@ -118,28 +130,66 @@ export function Hero({ sliders = [] }: HeroProps) {
                             activeSlides[currentSlide].title
                         )}
                     </h1>
-                    <p className="text-xl md:text-2xl mb-10 max-w-2xl mx-auto font-light drop-shadow-md min-h-[3rem]">
+                    <p className="text-xl md:text-2xl max-w-2xl mx-auto font-light drop-shadow-md min-h-[3rem]">
                         {activeSlides[currentSlide].subtitle}
                     </p>
                 </div>
 
-                <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20 shadow-2xl">
+                {/* Advanced Search Bar */}
+                <div className="max-w-4xl mx-auto bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20 shadow-2xl">
                     <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-2">
-                        <div className="flex-grow">
-                            <input
-                                type="text"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Where do you want to go?"
-                                className="w-full h-14px px-6 py-4 rounded-xl bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            />
+                        {/* Keyword Input */}
+                        <div className="flex-[2]">
+                            <div className="relative h-14">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
+                                <input
+                                    type="text"
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    placeholder="Search tours..."
+                                    className="w-full h-full pl-11 pr-4 rounded-xl bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                />
+                            </div>
                         </div>
+
+                        {/* Destination Dropdown */}
+                        <div className="flex-1">
+                            <select
+                                value={selectedDestination}
+                                onChange={(e) => setSelectedDestination(e.target.value)}
+                                className="w-full h-14 px-4 rounded-xl bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none cursor-pointer"
+                                style={{ backgroundImage: 'none' }}
+                            >
+                                <option value="" className="text-gray-500">Destination</option>
+                                {destinations.map(dest => (
+                                    <option key={dest.id} value={dest.slug}>{dest.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Duration Dropdown */}
+                        <div className="flex-1">
+                            <select
+                                value={selectedDuration}
+                                onChange={(e) => setSelectedDuration(e.target.value)}
+                                className="w-full h-14 px-4 rounded-xl bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none cursor-pointer"
+                                style={{ backgroundImage: 'none' }}
+                            >
+                                <option value="" className="text-gray-500">Duration</option>
+                                <option value="1">1 Day</option>
+                                <option value="2-3">2-3 Days</option>
+                                <option value="4-7">4-7 Days</option>
+                                <option value="8+">8+ Days</option>
+                            </select>
+                        </div>
+
+                        {/* Submit Button */}
                         <button
                             type="submit"
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 group"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-14 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 group md:w-auto w-full"
                         >
-                            <Search size={20} className="group-hover:scale-110 transition-transform" />
-                            <span>Explore</span>
+                            <span>Find Tours</span>
+                            <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
                         </button>
                     </form>
                 </div>

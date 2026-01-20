@@ -16,7 +16,8 @@ import {
     List, ListOrdered, Quote, CodeIcon, Minus, Undo, Redo,
     Link2, Image as ImageIcon, UnderlineIcon
 } from 'lucide-react';
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
+import MediaPicker from '@/components/ui/MediaPicker';
 
 interface RichTextEditorProps {
     value: string;
@@ -60,8 +61,6 @@ export function RichTextEditor({ value, onChange, placeholder = 'Start writing y
         immediatelyRender: false,
     });
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
     const setLink = useCallback(() => {
         if (!editor) return;
 
@@ -79,43 +78,6 @@ export function RichTextEditor({ value, onChange, placeholder = 'Start writing y
 
         editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
     }, [editor]);
-
-    const addImage = useCallback(() => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-        }
-    }, []);
-
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('folder', 'blog-content');
-            formData.append('alt_text', file.name);
-
-            // Dynamically import to ensure we're using the server action in this client component
-            const { uploadMedia } = await import('@/app/(admin)/admin/media/actions');
-
-            // Show some loading state if possible, or just wait
-            const result = await uploadMedia(formData);
-
-            if (result.success && result.data) {
-                editor?.chain().focus().setImage({ src: result.data.url }).run();
-            } else {
-                alert('Upload failed: ' + result.error);
-            }
-        } catch (error) {
-            console.error('Editor upload error', error);
-            alert('Upload failed');
-        } finally {
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-        }
-    };
 
     if (!editor) {
         return null;
@@ -142,13 +104,6 @@ export function RichTextEditor({ value, onChange, placeholder = 'Start writing y
 
     return (
         <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-            <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageUpload}
-            />
             {/* Toolbar */}
             <div className="border-b border-gray-200 bg-gray-50 p-2 flex flex-wrap gap-1">
                 {/* Text Formatting */}
@@ -266,12 +221,30 @@ export function RichTextEditor({ value, onChange, placeholder = 'Start writing y
                     >
                         <Link2 size={18} />
                     </ToolbarButton>
-                    <ToolbarButton
-                        onClick={addImage}
-                        title="Add Image"
+
+                    <MediaPicker
+                        onChange={(url) => {
+                            if (url && typeof url === 'string') {
+                                const caption = window.prompt('Nhập chú thích cho ảnh (Tùy chọn):');
+
+                                if (caption) {
+                                    editor.chain().focus()
+                                        .setImage({ src: url, alt: caption, title: caption })
+                                        .insertContent(`<p style="text-align: center"><em>${caption}</em></p>`)
+                                        .run();
+                                } else {
+                                    editor.chain().focus().setImage({ src: url }).run();
+                                }
+                            }
+                        }}
                     >
-                        <ImageIcon size={18} />
-                    </ToolbarButton>
+                        <div
+                            title="Add Image"
+                            className="p-2 rounded hover:bg-gray-100 transition-colors text-gray-700 cursor-pointer"
+                        >
+                            <ImageIcon size={18} />
+                        </div>
+                    </MediaPicker>
                 </div>
 
                 {/* Undo/Redo */}

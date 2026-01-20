@@ -1,36 +1,61 @@
-
 import { createClient } from '@/lib/supabase/server'
-import { TourCard } from '@/components/features/tours/TourCard'
-import { Search, SlidersHorizontal } from 'lucide-react'
+import { ToursClient } from './ToursClient'
+import { getAllDestinations } from '@/lib/actions/destination-actions'
+import { getRegions } from '@/lib/actions/region-actions'
 
 export const revalidate = 0 // Dynamic data for development
 
 export default async function ToursPage(props: {
-    searchParams: Promise<{ destination?: string; q?: string; region?: string }>
+    searchParams: Promise<{
+        q?: string
+        destination?: string
+        region?: string
+        duration?: string
+        minPrice?: string
+        maxPrice?: string
+    }>
 }) {
     const searchParams = await props.searchParams
-    const destinationSlug = searchParams.destination
     const searchQuery = searchParams.q
-    const region = searchParams.region
+    const destinationSlug = searchParams.destination
+    const regionSlug = searchParams.region
+    const duration = searchParams.duration
+    const minPrice = searchParams.minPrice ? parseFloat(searchParams.minPrice) : undefined
+    const maxPrice = searchParams.maxPrice ? parseFloat(searchParams.maxPrice) : undefined
 
     const supabase = await createClient()
 
+    // Build query
     let query = supabase
         .from('tours')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
 
-    if (destinationSlug) {
-        query = query.eq('destinations.slug', destinationSlug)
-    }
-
-    if (region) {
-        query = query.eq('destinations.region', region)
-    }
-
+    // Search filter
     if (searchQuery) {
         query = query.ilike('title', `%${searchQuery}%`)
+    }
+
+    // Price range filter
+    if (minPrice !== undefined) {
+        query = query.gte('price_adult', minPrice)
+    }
+    if (maxPrice !== undefined) {
+        query = query.lte('price_adult', maxPrice)
+    }
+
+    // Duration filter
+    if (duration) {
+        if (duration === '1') {
+            query = query.eq('duration_days', 1)
+        } else if (duration === '2-3') {
+            query = query.gte('duration_days', 2).lte('duration_days', 3)
+        } else if (duration === '4-7') {
+            query = query.gte('duration_days', 4).lte('duration_days', 7)
+        } else if (duration === '8+') {
+            query = query.gte('duration_days', 8)
+        }
     }
 
     const { data: tours, error } = await query
@@ -38,61 +63,57 @@ export default async function ToursPage(props: {
     console.log('Public Tours Page Debug:')
     console.log('Error:', error)
     console.log('Tours Count:', tours?.length)
-    if (tours && tours.length > 0) {
-        console.log('Sample Tour Status:', tours[0].status)
+
+    let filteredTours = tours || []
+
+    // Filter by destination or region (requires join with tour_destinations)
+    if (destinationSlug || regionSlug) {
+        const tourIds = filteredTours.map(t => t.id)
+
+        if (tourIds.length > 0) {
+            let destQuery = supabase
+                .from('tour_destinations')
+                .select('tour_id, destinations(id, name, slug, region)')
+                .in('tour_id', tourIds)
+
+            const { data: tourDestinations } = await destQuery
+
+            if (tourDestinations) {
+                const validTourIds = new Set<string>()
+
+                tourDestinations.forEach(td => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const dest = td.destinations as any
+                    if (!dest) return
+
+                    let matches = true
+                    if (destinationSlug && dest.slug !== destinationSlug) matches = false
+                    if (regionSlug && dest.region !== regionSlug) matches = false
+
+                    if (matches) {
+                        validTourIds.add(td.tour_id)
+                    }
+                })
+
+                filteredTours = filteredTours.filter(t => validTourIds.has(t.id))
+            }
+        }
     }
 
+    // Fetch destinations and regions for filters
+    const [destinationsResult, regionsResult] = await Promise.all([
+        getAllDestinations({ status: 'published', limit: 100 }),
+        getRegions()
+    ])
+
+    const destinations = destinationsResult.data || []
+    const regions = regionsResult.data || []
+
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-            {/* Hero Section */}
-            <div className="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white py-24 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30"></div>
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="max-w-4xl mx-auto text-center">
-                        <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-in fade-in duration-700">
-                            Explore Our Tours
-                        </h1>
-                        <p className="text-xl md:text-2xl text-emerald-50 leading-relaxed">
-                            Browse our handpicked selection of tours designed to immerse you in the culture, history, and natural beauty of Vietnam
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="container mx-auto px-4 py-12 md:py-24">
-
-                {/* Filters Bar (Placeholder) */}
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-12 flex flex-col md:flex-row items-center gap-4 justify-between">
-                    <div className="relative w-full md:w-96">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input
-                            type="text"
-                            placeholder="Search tours..."
-                            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                        />
-                    </div>
-
-                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium text-sm">
-                        <SlidersHorizontal size={18} />
-                        Filters
-                    </button>
-                </div>
-
-                {/* Tours Grid */}
-                {tours && tours.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {tours.map((tour) => (
-                            <TourCard key={tour.id} tour={tour} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
-                        <h3 className="text-xl font-medium text-gray-900 mb-2">No tours found</h3>
-                        <p className="text-gray-500">Check back soon as we add new exciting itineraries!</p>
-                    </div>
-                )
-                }
-            </div>
-        </div>
+        <ToursClient
+            initialTours={filteredTours}
+            destinations={destinations}
+            regions={regions}
+        />
     )
 }
