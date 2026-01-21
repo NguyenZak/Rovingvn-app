@@ -6,13 +6,14 @@ import { useState, useEffect } from 'react'
 import {
     LayoutDashboard, Map, Calendar, FileText, Settings, LogOut,
     Users, MapPin, BarChart3, CalendarDays, Image, Compass, MessageSquare, Globe,
-    ChevronLeft, ChevronRight, TrendingUp, MessageSquareQuote
+    ChevronLeft, ChevronRight, TrendingUp, MessageSquareQuote, Mail
 } from 'lucide-react'
 import { signout } from '@/app/login/actions'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
     { href: '/admin/tours', label: 'Tours', icon: Map },
     { href: '/admin/destinations', label: 'Destinations', icon: MapPin },
     { href: '/admin/regions', label: 'Regions', icon: Globe },
