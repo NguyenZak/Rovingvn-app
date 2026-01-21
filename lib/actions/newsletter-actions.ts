@@ -53,9 +53,10 @@ export async function subscribeToNewsletter(formData: FormData): Promise<Subscri
 
     } catch (error) {
         if (error instanceof z.ZodError) {
+            const zodError = error as any;
             return {
                 success: false,
-                message: error.errors[0].message
+                message: zodError.errors?.[0]?.message || 'Invalid input'
             }
         }
 
