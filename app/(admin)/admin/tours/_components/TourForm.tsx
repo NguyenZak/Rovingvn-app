@@ -97,7 +97,7 @@ export function TourForm({ initialData }: TourFormProps) {
 
     const addItineraryDay = () => {
         const current = formData.itinerary || [];
-        const lastDayStr = current.length > 0 ? current[current.length - 1].day : null;
+        const lastDayStr = current.length > 0 ? (current[current.length - 1] as any).day : null;
         let nextDay: string | number = current.length + 1;
         if (lastDayStr != null && !isNaN(Number(lastDayStr))) {
              nextDay = Number(lastDayStr) + 1;
