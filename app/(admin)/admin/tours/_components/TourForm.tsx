@@ -97,16 +97,18 @@ export function TourForm({ initialData }: TourFormProps) {
 
     const addItineraryDay = () => {
         const current = formData.itinerary || [];
-        handleChange('itinerary', [...current, { day: current.length + 1, title: '', description: '' }]);
+        const lastDayStr = current.length > 0 ? current[current.length - 1].day : null;
+        let nextDay: string | number = current.length + 1;
+        if (lastDayStr != null && !isNaN(Number(lastDayStr))) {
+             nextDay = Number(lastDayStr) + 1;
+        }
+        handleChange('itinerary', [...current, { day: nextDay, title: '', description: '' }]);
     };
 
     const removeItineraryDay = (index: number) => {
         const newItinerary = [...(formData.itinerary || [])];
         newItinerary.splice(index, 1);
-        // Re-index days
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const reindexed = newItinerary.map((item, i) => ({ ...(item as any), day: i + 1 }));
-        handleChange('itinerary', reindexed);
+        handleChange('itinerary', newItinerary);
     };
 
     const handleArrayChange = (field: 'includes' | 'excludes', index: number, value: string) => {
@@ -497,7 +499,15 @@ export function TourForm({ initialData }: TourFormProps) {
                                             </button>
                                         </div>
 
-                                        <h3 className="font-semibold text-gray-900 mb-3">Day {index + 1}</h3>
+                                        <div className="mb-3 flex items-center gap-2">
+                                            <label className="font-semibold text-gray-900">Day Label:</label>
+                                            <input
+                                                type="text"
+                                                value={day.day !== undefined ? day.day : index + 1}
+                                                onChange={(e) => handleItineraryChange(index, 'day', e.target.value)}
+                                                className="w-24 px-2 py-1 border border-gray-200 rounded focus:ring-emerald-500 focus:outline-none text-sm font-semibold"
+                                            />
+                                        </div>
 
                                         <div className="space-y-4">
                                             <div>
