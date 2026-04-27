@@ -81,6 +81,7 @@ export interface SiteSettings {
         customTrips?: boolean;
         newsletter?: boolean;
         reviews?: boolean;
+        flashSale?: boolean;
     };
 
     // Stats

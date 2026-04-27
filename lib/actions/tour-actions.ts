@@ -35,6 +35,7 @@ export interface Tour {
     meta_keywords?: string[];
     status?: string;
     featured?: boolean;
+    is_flash_sale?: boolean;
     created_at?: string;
     updated_at?: string;
     created_by?: string;
@@ -54,6 +55,7 @@ export interface ToursListParams {
     search?: string;
     status?: string;
     featured?: boolean;
+    is_flash_sale?: boolean;
     sortBy?: string;
     orderBy?: 'asc' | 'desc';
 }
@@ -69,6 +71,7 @@ export async function getAllTours(params: ToursListParams = {}) {
             search = '',
             status,
             featured,
+            is_flash_sale,
             sortBy = 'created_at',
             orderBy = 'desc'
         } = params;
@@ -91,6 +94,10 @@ export async function getAllTours(params: ToursListParams = {}) {
 
         if (featured !== undefined) {
             query = query.eq('featured', featured);
+        }
+
+        if (is_flash_sale !== undefined) {
+            query = query.eq('is_flash_sale', is_flash_sale);
         }
 
         query = query

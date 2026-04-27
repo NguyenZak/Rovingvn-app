@@ -11,6 +11,7 @@ import Link from "next/link";
 import { ArrowRight, MapPin, Calendar } from "lucide-react";
 
 const HowItWorks = dynamic(() => import("@/components/features/home/HowItWorks").then(mod => mod.HowItWorks));
+const TourFlashSale = dynamic(() => import("@/components/features/home/TourFlashSale").then(mod => mod.TourFlashSale));
 const VietnamRegions = dynamic(() => import("@/components/features/home/VietnamRegions").then(mod => mod.VietnamRegions));
 const CulturalHighlights = dynamic(() => import("@/components/features/home/CulturalHighlights").then(mod => mod.CulturalHighlights));
 const RecommendedProvinces = dynamic(() => import("@/components/features/home/RecommendedProvinces").then(mod => mod.RecommendedProvinces));
@@ -35,7 +36,8 @@ export default async function Home() {
     { data: sliders },
     settings,
     highlights,
-    regionsResult
+    regionsResult,
+    flashSaleToursResult
   ] = await Promise.all([
     getAllTours({ limit: 4, status: 'published', sortBy: 'created_at', orderBy: 'desc' }),
     // Fetch all destinations for search dropdown
@@ -67,13 +69,16 @@ export default async function Home() {
     // Fetch highlights
     getHighlights(),
     // Fetch regions
-    getRegions()
+    getRegions(),
+    // Fetch flash sale tours
+    getAllTours({ limit: 4, status: 'published', is_flash_sale: true, sortBy: 'created_at', orderBy: 'desc' })
   ])
 
   const featuredTours = featuredToursResult.data || []
   const allDestinations = allDestinationsResult.data || []
   const regions = regionsResult.data || []
   const featuredDestinations = featuredDestinationsResult.data || []
+  const flashSaleTours = flashSaleToursResult.data || []
 
   console.log('Home Page Debug - Tours:', featuredTours?.length || 0)
   console.log('Home Page Debug - Featured Destinations:', featuredDestinations?.length || 0)
@@ -90,6 +95,10 @@ export default async function Home() {
         destinations={settings?.stat_destinations}
         years={settings?.stat_years}
       />
+
+      {settings?.features?.flashSale && flashSaleTours.length > 0 && (
+        <TourFlashSale tours={flashSaleTours} />
+      )}
 
       <VietnamRegions regions={regions} />
 

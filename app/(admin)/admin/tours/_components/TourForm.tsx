@@ -49,6 +49,7 @@ export function TourForm({ initialData }: TourFormProps) {
         meta_title: initialData?.meta_title || '',
         meta_description: initialData?.meta_description || '',
         status: initialData?.status || 'draft',
+        is_flash_sale: initialData?.is_flash_sale || false,
         start_location: initialData?.start_location || '',
         destination_ids: initialData?.destination_ids || [],
     });
@@ -310,6 +311,21 @@ export function TourForm({ initialData }: TourFormProps) {
                                         <option value="published">Published</option>
                                         <option value="archived">Archived</option>
                                     </select>
+                                </div>
+
+                                <div className="flex items-end">
+                                    <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.is_flash_sale}
+                                            onChange={(e) => handleChange('is_flash_sale', e.target.checked)}
+                                            className="w-5 h-5 text-red-600 rounded focus:ring-red-500 border-gray-300"
+                                        />
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold text-gray-900">Flash Sale</span>
+                                            <span className="text-xs text-gray-500">Hiển thị trong mục Flash Sale ở trang chủ</span>
+                                        </div>
+                                    </label>
                                 </div>
 
                                 <div>

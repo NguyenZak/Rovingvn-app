@@ -79,6 +79,15 @@ export function SiteSettingsClient({ initialSettings }: SiteSettingsClientProps)
         stat_years: initialSettings?.stat_years || 10,
     });
 
+    const [features, setFeatures] = useState({
+        blog: initialSettings?.features?.blog ?? true,
+        tours: initialSettings?.features?.tours ?? true,
+        customTrips: initialSettings?.features?.customTrips ?? true,
+        newsletter: initialSettings?.features?.newsletter ?? true,
+        reviews: initialSettings?.features?.reviews ?? true,
+        flashSale: initialSettings?.features?.flashSale ?? false,
+    });
+
     const handleSaveAll = () => {
         startTransition(async () => {
             const result = await updateSiteSettings({
@@ -89,6 +98,7 @@ export function SiteSettingsClient({ initialSettings }: SiteSettingsClientProps)
                 ...analytics,
                 ...business,
                 ...stats,
+                features,
                 meta_keywords: seo.meta_keywords.split(",").map(k => k.trim()).filter(Boolean),
             });
 
@@ -673,6 +683,37 @@ export function SiteSettingsClient({ initialSettings }: SiteSettingsClientProps)
                                 <option value="LocalBusiness">Local Business</option>
                             </select>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Features Information */}
+            <section className="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div className="p-6 border-b border-gray-100 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                        <TrendingUp size={20} className="text-yellow-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900">Tính năng (Features)</h2>
+                        <p className="text-sm text-gray-500">Bật/tắt các module tính năng trên website</p>
+                    </div>
+                </div>
+
+                <div className="p-6 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <label className="flex items-center justify-between p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                            <div>
+                                <h3 className="font-semibold text-gray-900">Flash Sale Tours</h3>
+                                <p className="text-sm text-gray-500">Hiển thị mục Flash Sale trên trang chủ</p>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={features.flashSale}
+                                onChange={(e) => setFeatures({ ...features, flashSale: e.target.checked })}
+                                className="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                            />
+                        </label>
+                        {/* We can add other features here later if needed */}
                     </div>
                 </div>
             </section>
